@@ -12,6 +12,12 @@
       "runtimeExecutable": "npx",
       "runtimeArgs": ["serve", "ship-it", "-l", "3701", "--no-clipboard"],
       "port": 3701
+    },
+    {
+      "name": "chai-tapri",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "chai-tapri", "-l", "3702", "--no-clipboard"],
+      "port": 3702
     }
   ]
 }

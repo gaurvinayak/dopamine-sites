@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Strong Hire — Your Dream Interview Result</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --brand: #1a73e8;
+      --brand-light: #e8f0fe;
+      --brand-dark: #1557b0;
+      --text: #1a1a1a;
+      --text-muted: #5f6368;
+      --bg: #fafafa;
+      --card: #ffffff;
+      --border: #e0e0e0;
+      --shadow: 0 1px 3px rgba(0,0,0,.10), 0 4px 16px rgba(0,0,0,.06);
+      --shadow-lg: 0 4px 24px rgba(0,0,0,.12), 0 8px 32px rgba(0,0,0,.08);
+      --radius: 12px;
+    }
+
+    body {
+      font-family: 'Inter', 'Google Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 32px 16px 64px;
+    }
+
+    /* ── LOGO / HEADER ── */
+    .site-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .site-header h1 {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .site-header .tagline {
+      font-size: 12px;
+      color: #aaa;
+      margin-top: 4px;
+    }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      width: 100%;
+      max-width: 580px;
+      overflow: hidden;
+      transition: box-shadow .3s;
+    }
+    .card:hover { box-shadow: var(--shadow-lg); }
+
+    /* ── SETUP FORM ── */
+    #setup-screen { padding: 40px 36px 36px; }
+
+    .form-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .form-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 28px;
+    }
+
+    .field { margin-bottom: 22px; }
+    .field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .field input[type="text"] {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      color: var(--text);
+      background: #fff;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .field input[type="text"]:focus {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px var(--brand-light);
+    }
+
+    /* Company pill buttons */
+    .company-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .company-btn {
+      padding: 8px 16px;
+      border-radius: 20px;
+      border: 2px solid var(--border);
+      background: #fff;
+      font-size: 13px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all .18s;
+      color: var(--text);
+    }
+    .company-btn:hover { opacity: .85; }
+    .company-btn.selected {
+      color: #fff;
+      border-color: transparent;
+    }
+
+    /* Role & Round as pill toggle groups */
+    .pill-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .pill-btn {
+      padding: 8px 14px;
+      border-radius: 20px;
+      border: 1.5px solid var(--border);
+      background: #fff;
+      font-size: 12.5px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all .18s;
+    }
+    .pill-btn:hover { border-color: var(--brand); color: var(--brand); }
+    .pill-btn.selected {
+      background: var(--brand-light);
+      border-color: var(--brand);
+      color: var(--brand);
+      font-weight: 600;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      background: var(--brand);
+      color: #fff;
+      margin-top: 8px;
+      transition: background .2s, transform .1s, box-shadow .2s;
+      letter-spacing: .02em;
+    }
+    .submit-btn:hover {
+      filter: brightness(1.07);
+      box-shadow: 0 4px 14px rgba(0,0,0,.18);
+    }
+    .submit-btn:active { transform: scale(.98); }
+
+    /* ── LOADING SCREEN ── */
+    #loading-screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 72px 36px;
+      min-height: 280px;
+      gap: 20px;
+    }
+
+    .briefcase-wrap {
+      position: relative;
+      width: 72px;
+      height: 72px;
+    }
+    .briefcase-icon {
+      width: 72px;
+      height: 72px;
+      animation: floatBriefcase 1.6s ease-in-out infinite;
+    }
+    @keyframes floatBriefcase {
+      0%, 100% { transform: translateY(0) rotate(-3deg); }
+      50%       { transform: translateY(-10px) rotate(3deg); }
+    }
+
+    .loading-dots {
+      display: flex;
+      gap: 6px;
+    }
+    .loading-dots span {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--brand);
+      animation: bounce .9s ease-in-out infinite;
+    }
+    .loading-dots span:nth-child(2) { animation-delay: .15s; }
+    .loading-dots span:nth-child(3) { animation-delay: .30s; }
+    @keyframes bounce {
+      0%, 80%, 100% { transform: scale(0.6); opacity:.4; }
+      40%            { transform: scale(1); opacity:1; }
+    }
+
+    .loading-text {
+      font-size: 14px;
+      color: var(--text-muted);
+      font-weight: 500;
+      text-align: center;
+      animation: fadeText 2s ease-in-out forwards;
+    }
+    @keyframes fadeText {
+      0%   { opacity: 0; transform: translateY(4px); }
+      20%  { opacity: 1; transform: translateY(0); }
+      80%  { opacity: 1; }
+      100% { opacity: .6; }
+    }
+
+    /* ── RESULT SCREEN ── */
+    #result-screen { display: none; }
+
+    /* Letterhead header */
+    .letter-header {
+      background: var(--brand);
+      padding: 28px 36px 24px;
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+    .letter-header::after {
+      content: '';
+      position: absolute;
+      right: -40px; top: -40px;
+      width: 180px; height: 180px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.07);
+    }
+    .letter-header::before {
+      content: '';
+      position: absolute;
+      right: 40px; bottom: -60px;
+      width: 120px; height: 120px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.05);
+    }
+    .company-name-header {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      opacity: .85;
+      margin-bottom: 10px;
+    }
+
+    /* VERDICT BANNER */
+    .verdict-banner {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: .02em;
+      line-height: 1.1;
+      position: relative;
+      z-index: 1;
+      animation: popIn .5s cubic-bezier(.34,1.56,.64,1) forwards;
+    }
+    @keyframes popIn {
+      0%   { opacity: 0; transform: scale(.8); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    .verdict-sub {
+      font-size: 13px;
+      opacity: .8;
+      margin-top: 8px;
+      font-weight: 400;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Letter body */
+    .letter-body {
+      padding: 32px 36px;
+      animation: slideUp .5s ease .2s both;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .letter-date {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+    .letter-greeting {
+      font-size: 15px;
+      font-weight: 500;
+      margin-bottom: 16px;
+    }
+    .letter-para {
+      font-size: 14px;
+      line-height: 1.7;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    /* Feedback bullets */
+    .feedback-list {
+      background: #f8fdf8;
+      border: 1px solid #c8e6c9;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+    }
+    .feedback-list .feedback-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .10em;
+      text-transform: uppercase;
+      color: #2e7d32;
+      margin-bottom: 10px;
+    }
+    .feedback-item {
+      font-size: 13.5px;
+      color: #2d4a2e;
+      margin-bottom: 7px;
+      line-height: 1.5;
+      display: flex;
+      gap: 8px;
+    }
+    .feedback-item:last-child { margin-bottom: 0; }
+    .check { flex-shrink: 0; }
+
+    /* Offer details box */
+    .offer-box {
+      background: var(--brand-light);
+      border-radius: 10px;
+      padding: 20px 22px;
+      margin-bottom: 24px;
+    }
+    .offer-box-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .10em;
+      text-transform: uppercase;
+      color: var(--brand);
+      margin-bottom: 14px;
+    }
+    .offer-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-size: 13.5px;
+      margin-bottom: 8px;
+      gap: 12px;
+    }
+    .offer-label { color: var(--text-muted); font-weight: 400; flex-shrink: 0; }
+    .offer-value { font-weight: 600; color: var(--text); text-align: right; }
+    .offer-divider { border: none; border-top: 1px solid #c5d9f7; margin: 12px 0; }
+    .offer-total-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+    }
+    .offer-total-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--brand);
+    }
+    .offer-total-value {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--brand);
+    }
+
+    /* Start date */
+    .start-date-row {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+    .start-date-row strong { color: var(--text); }
+
+    /* Closing */
+    .letter-close {
+      font-size: 14px;
+      color: #333;
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+    .signature-block {
+      border-top: 1px solid var(--border);
+      padding-top: 20px;
+    }
+    .signature-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .signature-title {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* ── SYSTEM DESIGN PANEL ── */
+    #sysdesign-panel {
+      border-top: 1px solid var(--border);
+      padding: 28px 36px;
+      animation: slideUp .5s ease .4s both;
+    }
+    .sysdesign-header {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .10em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+    .sysdesign-question {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 16px;
+    }
+    .ascii-diagram {
+      background: #1a1a1a;
+      color: #50fa7b;
+      border-radius: 8px;
+      padding: 18px 20px;
+      font-family: 'Courier New', monospace;
+      font-size: 11.5px;
+      line-height: 1.7;
+      overflow-x: auto;
+      margin-bottom: 16px;
+      white-space: pre;
+    }
+    .sysdesign-verdict {
+      background: #f3e5f5;
+      border: 1px solid #ce93d8;
+      border-radius: 8px;
+      padding: 14px 18px;
+      font-size: 13.5px;
+      color: #4a148c;
+      font-weight: 500;
+    }
+    .sysdesign-verdict span { font-weight: 700; }
+
+    /* ── ACTION BUTTONS ── */
+    .action-row {
+      display: flex;
+      gap: 10px;
+      padding: 0 36px 32px;
+      animation: slideUp .5s ease .55s both;
+    }
+    .share-btn {
+      flex: 1;
+      padding: 13px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      background: var(--brand);
+      color: #fff;
+      transition: filter .2s, box-shadow .2s;
+    }
+    .share-btn:hover { filter: brightness(1.1); box-shadow: 0 4px 14px rgba(0,0,0,.18); }
+    .reset-btn {
+      flex: 1;
+      padding: 13px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      background: #fff;
+      color: var(--text);
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .reset-btn:hover { border-color: var(--brand); box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(60px);
+      background: #1a1a1a;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      transition: transform .3s cubic-bezier(.34,1.56,.64,1), opacity .3s;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 9999;
+      white-space: nowrap;
+    }
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* ── CONFETTI CANVAS ── */
+    #confetti-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 9000;
+    }
+
+    /* ── FOOTER ── */
+    .site-footer {
+      margin-top: 28px;
+      text-align: center;
+      font-size: 11.5px;
+      color: #bbb;
+      max-width: 440px;
+      line-height: 1.6;
+    }
+    .site-footer a { color: #bbb; }
+
+    /* ── SCREEN TRANSITIONS ── */
+    .screen { width: 100%; max-width: 580px; }
+    .fade-out { animation: fadeOut .3s ease forwards; }
+    .fade-in  { animation: fadeIn  .35s ease forwards; }
+    @keyframes fadeOut { to { opacity: 0; transform: scale(.97); } }
+    @keyframes fadeIn  { from { opacity: 0; transform: scale(.97); } to { opacity: 1; transform: scale(1); } }
+
+    /* Error shake */
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      20%      { transform: translateX(-6px); }
+      40%      { transform: translateX(6px); }
+      60%      { transform: translateX(-4px); }
+      80%      { transform: translateX(4px); }
+    }
+    .shake { animation: shake .4s ease; }
+
+    /* Utility */
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <h1>Strong Hire</h1>
+  <p class="tagline">Aspiration, served fresh. 100% fantasy.</p>
+</header>
+
+<!-- SETUP SCREEN -->
+<div class="card screen" id="setup-screen">
+  <div style="padding: 40px 36px 36px;">
+    <p class="form-title">Your Dream Interview</p>
+    <p class="form-subtitle">Tell us where you want to land — we'll handle the rest.</p>
+
+    <div class="field">
+      <label>Your Name</label>
+      <input type="text" id="candidate-name" placeholder="Enter your name" autocomplete="off" />
+    </div>
+
+    <div class="field">
+      <label>Company</label>
+      <div class="company-grid" id="company-grid">
+        <button class="company-btn" data-company="Google"    data-color="#1a73e8" data-light="#e8f0fe">Google</button>
+        <button class="company-btn" data-company="Meta"      data-color="#0866ff" data-light="#e7f0ff">Meta</button>
+        <button class="company-btn" data-company="Microsoft" data-color="#107C10" data-light="#e6f4e6">Microsoft</button>
+        <button class="company-btn" data-company="Amazon"    data-color="#ff9900" data-light="#fff4e0">Amazon</button>
+        <button class="company-btn" data-company="Apple"     data-color="#1d1d1f" data-light="#f2f2f7">Apple</button>
+        <button class="company-btn" data-company="Flipkart"  data-color="#2874f0" data-light="#e8f0fe">Flipkart</button>
+        <button class="company-btn" data-company="Zerodha"   data-color="#387ed1" data-light="#e8f2ff">Zerodha</button>
+        <button class="company-btn" data-company="Stripe"    data-color="#635bff" data-light="#eeeeff">Stripe</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Role</label>
+      <div class="pill-group" id="role-group">
+        <button class="pill-btn" data-role="SWE L4">SWE L4</button>
+        <button class="pill-btn" data-role="SWE L5">SWE L5</button>
+        <button class="pill-btn" data-role="SWE L6">SWE L6</button>
+        <button class="pill-btn" data-role="Staff Engineer">Staff Engineer</button>
+        <button class="pill-btn" data-role="Principal Engineer">Principal Engineer</button>
+        <button class="pill-btn" data-role="Engineering Manager">Engineering Manager</button>
+        <button class="pill-btn" data-role="Data Scientist">Data Scientist</button>
+        <button class="pill-btn" data-role="Product Manager">Product Manager</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Round</label>
+      <div class="pill-group" id="round-group">
+        <button class="pill-btn" data-round="Final Round">Final Round</button>
+        <button class="pill-btn" data-round="System Design">System Design</button>
+        <button class="pill-btn" data-round="Coding + Behavioral">Coding + Behavioral</button>
+        <button class="pill-btn" data-round="Bar Raiser">Bar Raiser</button>
+      </div>
+    </div>
+
+    <button class="submit-btn" id="submit-btn" onclick="startInterview()">Get My Result &rarr;</button>
+  </div>
+</div>
+
+<!-- LOADING SCREEN -->
+<div class="card screen hidden" id="loading-screen">
+  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:72px 36px;min-height:300px;gap:24px;">
+    <div class="briefcase-wrap">
+      <svg class="briefcase-icon" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="8" y="26" width="56" height="36" rx="6" fill="none" stroke-width="3" stroke="var(--brand)" />
+        <path d="M24 26V20a4 4 0 0 1 4-4h16a4 4 0 0 1 4 4v6" stroke="var(--brand)" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <line x1="8" y1="44" x2="64" y2="44" stroke="var(--brand)" stroke-width="2.5" stroke-dasharray="4 3" />
+        <circle cx="36" cy="44" r="4" fill="var(--brand)" />
+      </svg>
+    </div>
+    <div class="loading-dots">
+      <span></span><span></span><span></span>
+    </div>
+    <p class="loading-text" id="loading-text">Calibrating panel feedback...</p>
+  </div>
+</div>
+
+<!-- RESULT SCREEN -->
+<div class="card screen hidden" id="result-screen">
+  <div class="letter-header" id="letter-header">
+    <div class="company-name-header" id="result-company-name">Google</div>
+    <div class="verdict-banner">&#11088; STRONG HIRE &#11088;</div>
+    <div class="verdict-sub" id="verdict-sub">Unanimous decision &bull; All rounds cleared</div>
+  </div>
+
+  <div class="letter-body">
+    <div class="letter-date" id="letter-date"></div>
+    <div class="letter-greeting" id="letter-greeting"></div>
+    <p class="letter-para" id="letter-intro"></p>
+
+    <div class="feedback-list">
+      <div class="feedback-title">Panel Feedback</div>
+      <div class="feedback-item"><span class="check">&#9989;</span><span>"Outstanding problem decomposition and optimal solution clarity"</span></div>
+      <div class="feedback-item"><span class="check">&#9989;</span><span>"System design scaled elegantly to 10M+ users — fault-tolerant architecture"</span></div>
+      <div class="feedback-item"><span class="check">&#9989;</span><span>"Strong behavioral signals; high-impact mindset with clear ownership"</span></div>
+      <div class="feedback-item"><span class="check">&#9989;</span><span>"Would raise the bar for the team — unanimous Strong Hire"</span></div>
+    </div>
+
+    <div class="offer-box" id="offer-box">
+      <div class="offer-box-title">Offer Details (Confidential)</div>
+      <div class="offer-row">
+        <span class="offer-label">Base Salary</span>
+        <span class="offer-value" id="offer-base"></span>
+      </div>
+      <div class="offer-row">
+        <span class="offer-label">Annual Bonus</span>
+        <span class="offer-value" id="offer-bonus"></span>
+      </div>
+      <div class="offer-row">
+        <span class="offer-label">Stock (RSU, 4 yr)</span>
+        <span class="offer-value" id="offer-rsu"></span>
+      </div>
+      <div class="offer-row">
+        <span class="offer-label">Signing Bonus</span>
+        <span class="offer-value" id="offer-sign"></span>
+      </div>
+      <hr class="offer-divider" />
+      <div class="offer-total-row">
+        <span class="offer-total-label">Total Comp (Year 1)</span>
+        <span class="offer-total-value" id="offer-total"></span>
+      </div>
+    </div>
+
+    <div class="start-date-row">
+      <strong>Proposed Start Date:</strong>&nbsp;<span id="start-date"></span>
+    </div>
+
+    <p class="letter-close">
+      We are genuinely excited about the impact you will bring to <span id="letter-company-inline"></span>. Please confirm your acceptance within 5 business days.
+    </p>
+
+    <div class="signature-block">
+      <div class="signature-name" id="sig-name">The Hiring Committee</div>
+      <div class="signature-title" id="sig-title"></div>
+    </div>
+  </div>
+
+  <!-- SYSTEM DESIGN PANEL (conditionally shown) -->
+  <div id="sysdesign-panel" class="hidden">
+    <div class="sysdesign-header">&#128202; System Design Evaluation</div>
+    <div class="sysdesign-question" id="sysdesign-q"></div>
+    <div class="ascii-diagram" id="ascii-diagram"></div>
+    <div class="sysdesign-verdict" id="sysdesign-verdict"></div>
+  </div>
+
+  <div class="action-row">
+    <button class="share-btn" id="share-btn" onclick="shareResult()">&#128279; Copy &amp; Share</button>
+    <button class="reset-btn" onclick="resetInterview()">&#128197; Book Another Interview</button>
+  </div>
+</div>
+
+<!-- CONFETTI CANVAS -->
+<canvas id="confetti-canvas"></canvas>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<footer class="site-footer">
+  This is a simulation for motivational purposes only. Keep practicing — real interviews are won one rep at a time. You've got this. &#128153;
+</footer>
+
+<script>
+  // ── STATE ──
+  let selectedCompany = null;
+  let selectedRole    = null;
+  let selectedRound   = null;
+  let companyColor    = '#1a73e8';
+  let companyLight    = '#e8f0fe';
+  let confettiRAF     = null;
+
+  // ── COMPANY BUTTON SELECTION ──
+  document.querySelectorAll('.company-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.company-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedCompany = btn.dataset.company;
+      companyColor    = btn.dataset.color;
+      companyLight    = btn.dataset.light;
+      btn.style.background   = companyColor;
+      btn.style.borderColor  = companyColor;
+      btn.style.color        = '#fff';
+      updateBrandColor();
+    });
+  });
+
+  document.querySelectorAll('#role-group .pill-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#role-group .pill-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedRole = btn.dataset.role;
+    });
+  });
+
+  document.querySelectorAll('#round-group .pill-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#round-group .pill-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedRound = btn.dataset.round;
+    });
+  });
+
+  function updateBrandColor() {
+    document.documentElement.style.setProperty('--brand',       companyColor);
+    document.documentElement.style.setProperty('--brand-light', companyLight);
+    // Pick dark variant
+    document.documentElement.style.setProperty('--brand-dark',  darken(companyColor, 20));
+  }
+
+  function darken(hex, pct) {
+    let r = parseInt(hex.slice(1,3),16);
+    let g = parseInt(hex.slice(3,5),16);
+    let b = parseInt(hex.slice(5,7),16);
+    r = Math.max(0, r - Math.round(r * pct/100));
+    g = Math.max(0, g - Math.round(g * pct/100));
+    b = Math.max(0, b - Math.round(b * pct/100));
+    return '#' + [r,g,b].map(x=>x.toString(16).padStart(2,'0')).join('');
+  }
+
+  // ── SALARY DATA ──
+  const salaryData = {
+    'SWE L4':               { base:[28,40], bonus:[12,18], rsu:[40,70],  sign:[5,8]  },
+    'SWE L5':               { base:[40,60], bonus:[15,22], rsu:[70,120], sign:[8,12] },
+    'SWE L6':               { base:[55,80], bonus:[18,25], rsu:[100,180],sign:[10,18]},
+    'Staff Engineer':       { base:[70,90], bonus:[20,28], rsu:[150,220],sign:[15,22]},
+    'Principal Engineer':   { base:[85,110],bonus:[22,30], rsu:[200,300],sign:[18,28]},
+    'Engineering Manager':  { base:[60,90], bonus:[18,25], rsu:[100,180],sign:[10,18]},
+    'Data Scientist':       { base:[30,55], bonus:[12,20], rsu:[60,120], sign:[6,12] },
+    'Product Manager':      { base:[35,60], bonus:[15,22], rsu:[80,140], sign:[8,15] },
+  };
+
+  function randInRange(lo, hi) {
+    return Math.floor(Math.random() * (hi - lo + 1)) + lo;
+  }
+
+  function formatLPA(n) { return '&#8377;' + n + ' LPA'; }
+
+  // ── SYSTEM DESIGN PROMPTS ──
+  const systemDesignPrompts = [
+    {
+      q: 'Design a URL Shortener at global scale (e.g., bit.ly clone).',
+      diagram: `
+  Client
+    │
+    ▼
+  ┌──────────────────┐     ┌──────────────┐
+  │   API Gateway    │────▶│  Rate Limiter │
+  └────────┬─────────┘     └──────────────┘
+           │
+    ┌──────▼───────┐
+    │  Short-URL   │
+    │  Service     │
+    └──────┬───────┘
+           │
+    ┌──────▼──────────────────────────────┐
+    │  Cache (Redis)  ←──── Write-through │
+    └──────┬──────────────────────────────┘
+           │  (miss)
+    ┌──────▼──────────┐
+    │  Primary DB     │──── Replica (read)
+    │  (PostgreSQL)   │
+    └─────────────────┘
+
+  ID Gen: Snowflake IDs  |  Base-62 encoding
+  CDN: Edge redirect for top 1% URLs
+  Scale: 10M req/day, 99.99% uptime`,
+      verdict: 'Scaled to 10M users/day. Fault-tolerant with Redis + DB replica. Clean REST API. <span>STRONG HIRE.</span>',
+    },
+    {
+      q: 'Design a Real-Time Feed system (e.g., Twitter/Instagram).',
+      diagram: `
+  ┌─────────┐    Post     ┌──────────────────┐
+  │  User   │────────────▶│  Feed Write Svc  │
+  └─────────┘             └───────┬──────────┘
+                                  │ fan-out async
+                          ┌───────▼──────────┐
+                          │   Kafka Queue    │
+                          └───────┬──────────┘
+                                  │
+                   ┌──────────────▼────────────┐
+                   │  Feed Aggregator Workers  │
+                   └──────────────┬────────────┘
+                                  │
+                   ┌──────────────▼────────────┐
+                   │  Redis (pre-built feeds)  │
+                   └──────────────┬────────────┘
+                                  │ read
+                            ┌─────▼──────┐
+                            │  Client    │
+                            └────────────┘
+  Strategy: push for <10K followers; pull for celebrities`,
+      verdict: 'Hybrid fan-out strategy; Kafka decouples write/read. 50ms p99 read latency. <span>STRONG HIRE.</span>',
+    },
+    {
+      q: 'Design a Distributed Key-Value Store (e.g., DynamoDB).',
+      diagram: `
+  Client ──▶ Coordinator Node
+                    │
+         ┌──────────▼────────────┐
+         │   Consistent Hashing  │
+         │      Ring (vNodes)    │
+         └──────────┬────────────┘
+           ┌────────┼─────────┐
+           ▼        ▼         ▼
+       Node A    Node B    Node C
+       (Replica) (Primary) (Replica)
+           └────────┼─────────┘
+                    │
+              Gossip Protocol (failure detection)
+              Merkle Trees   (anti-entropy sync)
+
+  Quorum: W=2, R=2, N=3  |  Eventual consistency`,
+      verdict: 'Correct quorum analysis, vNode reasoning, and anti-entropy. Handles partition gracefully. <span>STRONG HIRE.</span>',
+    },
+  ];
+
+  // ── LOADING MESSAGES ──
+  const loadingMessages = [
+    'Calibrating panel feedback...',
+    'Reviewing your coding round...',
+    'Consulting the hiring committee...',
+    'Finalising compensation package...',
+  ];
+
+  // ── MAIN FLOW ──
+  function startInterview() {
+    const name = document.getElementById('candidate-name').value.trim();
+    if (!name || !selectedCompany || !selectedRole || !selectedRound) {
+      const card = document.getElementById('setup-screen');
+      card.classList.add('shake');
+      setTimeout(() => card.classList.remove('shake'), 400);
+      showToast('Please fill in all fields ✏️');
+      return;
+    }
+
+    // Transition to loading
+    const setupEl = document.getElementById('setup-screen');
+    setupEl.classList.add('fade-out');
+    setTimeout(() => {
+      setupEl.classList.add('hidden');
+      setupEl.classList.remove('fade-out');
+
+      const loadingEl = document.getElementById('loading-screen');
+      loadingEl.classList.remove('hidden');
+      loadingEl.classList.add('fade-in');
+
+      // Cycle loading messages
+      let msgIdx = 0;
+      const msgEl = document.getElementById('loading-text');
+      const msgInterval = setInterval(() => {
+        msgIdx = (msgIdx + 1) % loadingMessages.length;
+        msgEl.style.opacity = 0;
+        setTimeout(() => {
+          msgEl.textContent = loadingMessages[msgIdx];
+          msgEl.style.opacity = 1;
+        }, 250);
+      }, 700);
+
+      setTimeout(() => {
+        clearInterval(msgInterval);
+        showResult(name);
+      }, 2600);
+    }, 300);
+  }
+
+  function showResult(name) {
+    const loadingEl = document.getElementById('loading-screen');
+    loadingEl.classList.add('fade-out');
+    setTimeout(() => {
+      loadingEl.classList.add('hidden');
+      loadingEl.classList.remove('fade-out');
+
+      buildResultScreen(name);
+
+      const resultEl = document.getElementById('result-screen');
+      resultEl.classList.remove('hidden');
+      resultEl.classList.add('fade-in');
+
+      setTimeout(() => {
+        resultEl.classList.remove('fade-in');
+        launchConfetti();
+      }, 400);
+    }, 300);
+  }
+
+  function buildResultScreen(name) {
+    // Company header
+    document.getElementById('result-company-name').textContent = selectedCompany + ' — Official Hiring Decision';
+    document.getElementById('letter-company-inline').textContent = selectedCompany;
+    document.getElementById('letter-header').style.background = companyColor;
+
+    // Date
+    const today = new Date();
+    const dateStr = today.toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' });
+    document.getElementById('letter-date').textContent = dateStr;
+
+    // Greeting
+    document.getElementById('letter-greeting').textContent = `Dear ${name},`;
+
+    // Intro
+    document.getElementById('letter-intro').textContent =
+      `On behalf of the ${selectedCompany} hiring committee, we are delighted to inform you that following your ${selectedRound} interview, you have received a unanimous recommendation for the position of ${selectedRole} at ${selectedCompany}. Your performance was outstanding across every dimension we evaluate.`;
+
+    // Salary
+    const tier = salaryData[selectedRole] || salaryData['SWE L5'];
+    const base  = randInRange(...tier.base);
+    const bonus = randInRange(...tier.bonus);
+    const rsuTotalLPA = randInRange(...tier.rsu);
+    const sign  = randInRange(...tier.sign);
+    const rsuYear1 = Math.round(rsuTotalLPA / 4);
+    const year1total = base + Math.round(base * bonus / 100) + rsuYear1 + sign;
+
+    document.getElementById('offer-base').innerHTML  = formatLPA(base);
+    document.getElementById('offer-bonus').innerHTML = `${bonus}% of base (~&#8377;${Math.round(base*bonus/100)} LPA)`;
+    document.getElementById('offer-rsu').innerHTML   = `&#8377;${rsuTotalLPA} LPA total (&#8377;${rsuYear1} LPA/yr)`;
+    document.getElementById('offer-sign').innerHTML  = formatLPA(sign);
+    document.getElementById('offer-total').innerHTML = formatLPA(year1total);
+    document.getElementById('offer-box').style.background = companyLight;
+
+    // Store share data
+    window._shareText = `Just got a Strong Hire from ${selectedCompany}! ₹${year1total} LPA offer 🎉 #FakeItTillYouMakeIt #StrongHire`;
+    window._totalComp = year1total;
+
+    // Start date (~2 months from today)
+    const startDate = new Date(today);
+    startDate.setMonth(startDate.getMonth() + 2);
+    document.getElementById('start-date').textContent =
+      startDate.toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' });
+
+    // Signature
+    document.getElementById('sig-name').textContent  = 'The Hiring Committee';
+    document.getElementById('sig-title').textContent = `${selectedCompany} · Talent Acquisition`;
+
+    // Share button color
+    document.getElementById('share-btn').style.background = companyColor;
+
+    // System Design panel
+    const sysPanel = document.getElementById('sysdesign-panel');
+    if (selectedRound === 'System Design') {
+      sysPanel.classList.remove('hidden');
+      const prompt = systemDesignPrompts[Math.floor(Math.random() * systemDesignPrompts.length)];
+      document.getElementById('sysdesign-q').textContent = prompt.q;
+      document.getElementById('ascii-diagram').textContent = prompt.diagram.trim();
+      document.getElementById('sysdesign-verdict').innerHTML = prompt.verdict;
+    } else {
+      sysPanel.classList.add('hidden');
+    }
+  }
+
+  function shareResult() {
+    const text = window._shareText || 'Just got a Strong Hire! #FakeItTillYouMakeIt';
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('Copied to clipboard! Paste & share 🎉');
+      }).catch(() => fallbackCopy(text));
+    } else {
+      fallbackCopy(text);
+    }
+  }
+
+  function fallbackCopy(text) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('Copied to clipboard! Paste & share 🎉');
+  }
+
+  function resetInterview() {
+    stopConfetti();
+    const resultEl = document.getElementById('result-screen');
+    resultEl.classList.add('fade-out');
+    setTimeout(() => {
+      resultEl.classList.add('hidden');
+      resultEl.classList.remove('fade-out');
+
+      // Reset form
+      selectedCompany = null;
+      selectedRole    = null;
+      selectedRound   = null;
+      document.getElementById('candidate-name').value = '';
+      document.querySelectorAll('.company-btn').forEach(b => {
+        b.classList.remove('selected');
+        b.style.background = '';
+        b.style.borderColor = '';
+        b.style.color = '';
+      });
+      document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('selected'));
+
+      // Reset brand color to default
+      companyColor = '#1a73e8'; companyLight = '#e8f0fe';
+      updateBrandColor();
+
+      const setupEl = document.getElementById('setup-screen');
+      setupEl.classList.remove('hidden');
+      setupEl.classList.add('fade-in');
+      setTimeout(() => setupEl.classList.remove('fade-in'), 400);
+    }, 300);
+  }
+
+  // ── TOAST ──
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  // ── CONFETTI ──
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx    = canvas.getContext('2d');
+  let particles = [];
+
+  function resizeCanvas() {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  function launchConfetti() {
+    stopConfetti();
+    particles = [];
+    const colors = ['#FFD700','#FF6B6B','#4ECDC4','#45B7D1','#96CEB4','#FECA57','#FF9FF3'];
+    // inject brand color
+    colors.push(companyColor);
+    for (let i = 0; i < 180; i++) {
+      particles.push({
+        x:  Math.random() * canvas.width,
+        y:  Math.random() * canvas.height - canvas.height,
+        r:  Math.random() * 6 + 3,
+        d:  Math.random() * 3 + 1.5,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        tilt: Math.random() * 10 - 5,
+        tiltAngle: 0,
+        tiltSpeed: Math.random() * .1 + .02,
+        shape: Math.random() > .5 ? 'rect' : 'circle',
+        w: Math.random() * 10 + 5,
+        h: Math.random() * 6 + 4,
+        rotation: Math.random() * Math.PI * 2,
+        rotSpeed: (Math.random() - .5) * .15,
+      });
+    }
+    animateConfetti();
+    // Auto-stop after 4s
+    setTimeout(stopConfetti, 4000);
+  }
+
+  function animateConfetti() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let alive = false;
+    for (const p of particles) {
+      p.y += p.d;
+      p.x += Math.sin(p.tiltAngle) * 1.5;
+      p.tiltAngle += p.tiltSpeed;
+      p.rotation += p.rotSpeed;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rotation);
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = p.y > canvas.height * .85
+        ? 1 - (p.y - canvas.height * .85) / (canvas.height * .15)
+        : 1;
+      if (p.shape === 'circle') {
+        ctx.beginPath();
+        ctx.arc(0, 0, p.r, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+      }
+      ctx.restore();
+      if (p.y < canvas.height + 20) alive = true;
+    }
+    if (alive) {
+      confettiRAF = requestAnimationFrame(animateConfetti);
+    } else {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  }
+
+  function stopConfetti() {
+    if (confettiRAF) {
+      cancelAnimationFrame(confettiRAF);
+      confettiRAF = null;
+    }
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles = [];
+  }
+
+  // ── DEFAULT BRAND INIT ──
+  updateBrandColor();
+</script>
+</body>
+</html>

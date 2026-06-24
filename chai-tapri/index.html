@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chai Tapri — Desi Break Room</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Kalam:wght@300;400;700&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #2c1810;
+      --bg2:       #3a2015;
+      --amber:     #f4a460;
+      --amber-dim: #c8813a;
+      --cream:     #fffbe6;
+      --cream-dim: #e8d9b5;
+      --wood:      #8b4513;
+      --wood-light:#a0522d;
+      --shadow:    rgba(0,0,0,0.5);
+      --glow:      rgba(244,164,96,0.25);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--cream);
+      font-family: 'Kalam', cursive;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 0;
+      overflow-x: hidden;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 420px;
+      min-height: 100vh;
+      background: var(--bg);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* ===================== SPLASH ===================== */
+    #splash {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      text-align: center;
+      background: radial-gradient(ellipse at 50% 60%, #4a2818 0%, var(--bg) 70%);
+    }
+
+    .cup-wrapper {
+      position: relative;
+      margin-bottom: 1.5rem;
+    }
+
+    .cup-svg {
+      width: 110px;
+      height: auto;
+      filter: drop-shadow(0 8px 24px rgba(244,164,96,0.4));
+    }
+
+    .steam-container {
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 70px;
+      pointer-events: none;
+    }
+
+    .wisp {
+      position: absolute;
+      bottom: 0;
+      width: 10px;
+      border-radius: 50%;
+      background: transparent;
+      opacity: 0;
+      animation: wisp-rise 2.8s ease-in infinite;
+    }
+    .wisp::after {
+      content: '';
+      display: block;
+      width: 100%;
+      height: 40px;
+      background: linear-gradient(to top, rgba(255,251,230,0.5), transparent);
+      border-radius: 50% 50% 0 0;
+      filter: blur(3px);
+    }
+    .wisp:nth-child(1) { left: 15px; animation-delay: 0s;    animation-duration: 2.6s; }
+    .wisp:nth-child(2) { left: 33px; animation-delay: 0.7s;  animation-duration: 3.0s; }
+    .wisp:nth-child(3) { left: 52px; animation-delay: 1.4s;  animation-duration: 2.4s; }
+
+    @keyframes wisp-rise {
+      0%   { opacity: 0;   transform: translateY(0)    scaleX(1); }
+      20%  { opacity: 0.8; }
+      60%  { opacity: 0.4; transform: translateY(-45px) scaleX(1.5); }
+      100% { opacity: 0;   transform: translateY(-65px) scaleX(2); }
+    }
+
+    #splash h1 {
+      font-family: 'Caveat', cursive;
+      font-size: 2.6rem;
+      font-weight: 700;
+      color: var(--amber);
+      text-shadow: 0 2px 12px rgba(244,164,96,0.5);
+      margin-bottom: 0.6rem;
+      line-height: 1.1;
+    }
+
+    #splash p {
+      font-size: 1.05rem;
+      color: var(--cream-dim);
+      max-width: 280px;
+      line-height: 1.5;
+      margin-bottom: 2.2rem;
+    }
+
+    .btn-join {
+      background: var(--amber);
+      color: var(--bg);
+      border: none;
+      padding: 0.85rem 2.4rem;
+      border-radius: 50px;
+      font-family: 'Caveat', cursive;
+      font-size: 1.4rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(244,164,96,0.45), 0 1px 0 rgba(255,255,255,0.15) inset;
+      transition: transform 0.15s, box-shadow 0.15s;
+      letter-spacing: 0.02em;
+    }
+    .btn-join:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(244,164,96,0.6); }
+    .btn-join:active { transform: translateY(0); }
+
+    .splash-sub {
+      margin-top: 2rem;
+      font-size: 0.8rem;
+      color: rgba(255,251,230,0.3);
+    }
+
+    /* ===================== MAIN ROOM ===================== */
+    #room {
+      display: none;
+      flex-direction: column;
+      min-height: 100vh;
+      padding: 0;
+    }
+    #room.visible { display: flex; }
+
+    /* header */
+    .room-header {
+      background: var(--bg2);
+      padding: 1rem 1.2rem 0.8rem;
+      border-bottom: 2px solid var(--wood);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.6rem;
+    }
+
+    .tapri-title {
+      font-family: 'Caveat', cursive;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--amber);
+      line-height: 1;
+    }
+
+    .sutta-toggle {
+      background: transparent;
+      border: 1.5px solid var(--wood);
+      color: var(--cream-dim);
+      padding: 0.3rem 0.7rem;
+      border-radius: 20px;
+      font-family: 'Kalam', cursive;
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .sutta-toggle:hover, .sutta-toggle.active {
+      background: var(--wood);
+      color: var(--cream);
+      border-color: var(--wood-light);
+    }
+
+    /* live count */
+    .live-count {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.88rem;
+      color: var(--amber);
+      margin-bottom: 0.6rem;
+    }
+    .live-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #4caf50;
+      box-shadow: 0 0 6px #4caf50;
+      animation: pulse-dot 1.8s ease-in-out infinite;
+    }
+    @keyframes pulse-dot {
+      0%,100% { box-shadow: 0 0 4px #4caf50; }
+      50%      { box-shadow: 0 0 10px #4caf50, 0 0 20px rgba(76,175,80,0.3); }
+    }
+    #people-count { font-weight: 700; }
+
+    .avatars {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+    .avatar {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      font-weight: 700;
+      font-family: 'Caveat', cursive;
+      border: 1.5px solid rgba(255,251,230,0.2);
+      flex-shrink: 0;
+      animation: pop-in 0.3s cubic-bezier(0.175,0.885,0.32,1.275);
+    }
+    @keyframes pop-in {
+      from { transform: scale(0); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+
+    /* ===================== TIMER SECTION ===================== */
+    .timer-section {
+      padding: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: radial-gradient(ellipse at 50% 30%, rgba(139,69,19,0.2) 0%, transparent 70%);
+    }
+
+    .timer-ring-wrapper {
+      position: relative;
+      width: 130px;
+      height: 130px;
+      margin-bottom: 0.8rem;
+    }
+
+    .timer-ring-svg {
+      width: 130px; height: 130px;
+      transform: rotate(-90deg);
+    }
+
+    .ring-bg {
+      fill: none;
+      stroke: rgba(139,69,19,0.35);
+      stroke-width: 7;
+    }
+    .ring-progress {
+      fill: none;
+      stroke: var(--amber);
+      stroke-width: 7;
+      stroke-linecap: round;
+      stroke-dasharray: 339.29;
+      stroke-dashoffset: 0;
+      transition: stroke-dashoffset 1s linear;
+      filter: drop-shadow(0 0 6px rgba(244,164,96,0.6));
+    }
+
+    .timer-display {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+    .timer-label {
+      font-size: 0.7rem;
+      color: var(--cream-dim);
+      opacity: 0.7;
+      margin-bottom: 1px;
+    }
+    .timer-time {
+      font-family: 'Caveat', cursive;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--amber);
+      line-height: 1;
+    }
+
+    /* sip button */
+    .sip-area {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .btn-sip {
+      position: relative;
+      background: linear-gradient(135deg, var(--wood) 0%, var(--wood-light) 100%);
+      color: var(--cream);
+      border: none;
+      padding: 0.7rem 1.5rem;
+      border-radius: 40px;
+      font-family: 'Caveat', cursive;
+      font-size: 1.15rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.4), 0 1px 0 rgba(255,255,255,0.1) inset;
+      transition: transform 0.12s, box-shadow 0.12s;
+      overflow: hidden;
+    }
+    .btn-sip:hover { transform: translateY(-2px); box-shadow: 0 7px 20px rgba(0,0,0,0.5); }
+    .btn-sip:active { transform: scale(0.95); }
+    .btn-sip .steam-puff {
+      position: absolute;
+      top: -8px; left: 50%;
+      transform: translateX(-50%);
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,251,230,0.7) 0%, transparent 70%);
+      pointer-events: none;
+      opacity: 0;
+    }
+    .btn-sip.sipping .steam-puff {
+      animation: steam-puff 0.6s ease-out forwards;
+    }
+    @keyframes steam-puff {
+      0%   { opacity: 0.9; transform: translateX(-50%) translateY(0) scale(0.5); }
+      100% { opacity: 0;   transform: translateX(-50%) translateY(-28px) scale(2); }
+    }
+
+    .sip-counter {
+      font-size: 0.82rem;
+      color: var(--cream-dim);
+      text-align: center;
+      line-height: 1.3;
+    }
+    .sip-count-num {
+      font-family: 'Caveat', cursive;
+      font-size: 1.4rem;
+      color: var(--amber);
+      display: block;
+    }
+
+    /* ===================== ONE-LINER WALL ===================== */
+    .wall-section {
+      flex: 1;
+      padding: 0 1.2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .wall-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.7rem;
+      color: var(--cream-dim);
+      font-size: 0.82rem;
+      opacity: 0.7;
+    }
+    .wall-divider {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to right, var(--wood), transparent);
+    }
+
+    #feed {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      max-height: 280px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    #feed::-webkit-scrollbar { width: 3px; }
+    #feed::-webkit-scrollbar-track { background: transparent; }
+    #feed::-webkit-scrollbar-thumb { background: var(--wood); border-radius: 3px; }
+
+    .msg {
+      background: var(--bg2);
+      border: 1px solid rgba(139,69,19,0.35);
+      border-radius: 12px;
+      padding: 0.6rem 0.9rem;
+      font-size: 0.92rem;
+      color: var(--cream);
+      line-height: 1.4;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      animation: msg-fade-in 0.5s cubic-bezier(0.22,0.61,0.36,1) forwards;
+      opacity: 0;
+      transform: translateY(-6px);
+      position: relative;
+    }
+    .msg.you {
+      border-color: rgba(244,164,96,0.5);
+      background: rgba(244,164,96,0.08);
+    }
+    .msg-you-tag {
+      font-size: 0.7rem;
+      color: var(--amber);
+      margin-left: 0.4rem;
+      font-style: italic;
+    }
+    .msg-time {
+      font-size: 0.65rem;
+      color: rgba(255,251,230,0.3);
+      position: absolute;
+      bottom: 5px; right: 9px;
+    }
+
+    @keyframes msg-fade-in {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ===================== POST INPUT ===================== */
+    .post-section {
+      padding: 0.8rem 1.2rem;
+      background: var(--bg2);
+      border-top: 1px solid rgba(139,69,19,0.4);
+    }
+
+    .post-form {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .post-input {
+      flex: 1;
+      background: rgba(255,251,230,0.06);
+      border: 1.5px solid rgba(139,69,19,0.5);
+      border-radius: 30px;
+      padding: 0.55rem 1rem;
+      color: var(--cream);
+      font-family: 'Kalam', cursive;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .post-input::placeholder { color: rgba(255,251,230,0.3); }
+    .post-input:focus { border-color: var(--amber); }
+
+    .btn-post {
+      background: var(--amber);
+      color: var(--bg);
+      border: none;
+      padding: 0.55rem 1.1rem;
+      border-radius: 30px;
+      font-family: 'Caveat', cursive;
+      font-size: 1.05rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.12s, background 0.15s;
+      flex-shrink: 0;
+    }
+    .btn-post:hover { background: #ffb870; transform: scale(1.04); }
+    .btn-post:active { transform: scale(0.96); }
+
+    /* ===================== FOOTER ===================== */
+    footer {
+      text-align: center;
+      padding: 0.9rem 1rem;
+      font-size: 0.75rem;
+      color: rgba(255,251,230,0.25);
+      border-top: 1px solid rgba(139,69,19,0.25);
+      line-height: 1.6;
+    }
+    .wiggle-cup {
+      display: inline-block;
+      animation: wiggle 3s ease-in-out infinite;
+    }
+    @keyframes wiggle {
+      0%,100% { transform: rotate(-5deg); }
+      50%      { transform: rotate(5deg); }
+    }
+
+    /* ===================== TOAST ===================== */
+    #toast {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--wood);
+      color: var(--cream);
+      padding: 0.7rem 1.4rem;
+      border-radius: 30px;
+      font-family: 'Caveat', cursive;
+      font-size: 1.05rem;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s, transform 0.3s;
+      text-align: center;
+      z-index: 100;
+      max-width: 300px;
+      white-space: nowrap;
+    }
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ===================== SUTTA MODE ===================== */
+    body.sutta-mode {
+      --bg:  #1a1a2e;
+      --bg2: #16213e;
+      --amber: #c8a2e8;
+      --amber-dim: #9b72cc;
+      --wood: #4a3560;
+      --wood-light: #6b4d8a;
+      --glow: rgba(200,162,232,0.2);
+    }
+    body.sutta-mode #app {
+      background: var(--bg);
+    }
+    body.sutta-mode .room-header {
+      background: var(--bg2);
+    }
+
+    /* char counter */
+    .char-count {
+      font-size: 0.68rem;
+      color: rgba(255,251,230,0.25);
+      text-align: right;
+      margin-top: 2px;
+    }
+    .char-count.warn { color: #f4a460; }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- =================== SPLASH =================== -->
+  <div id="splash">
+    <div class="cup-wrapper">
+      <div class="steam-container">
+        <div class="wisp"></div>
+        <div class="wisp"></div>
+        <div class="wisp"></div>
+      </div>
+      <svg class="cup-svg" viewBox="0 0 110 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- saucer -->
+        <ellipse cx="55" cy="93" rx="42" ry="6" fill="#6b3410" opacity="0.5"/>
+        <!-- cup body -->
+        <path d="M20 45 Q18 82 55 85 Q92 82 90 45 Z" fill="#8b4513"/>
+        <path d="M20 45 Q18 82 55 85 Q92 82 90 45 Z" fill="url(#cup-grad)"/>
+        <!-- cup rim -->
+        <ellipse cx="55" cy="45" rx="35" ry="9" fill="#a0522d"/>
+        <!-- tea surface -->
+        <ellipse cx="55" cy="44" rx="30" ry="7" fill="#c8813a"/>
+        <ellipse cx="55" cy="43.5" rx="22" ry="4" fill="#d4901a" opacity="0.6"/>
+        <!-- handle -->
+        <path d="M90 52 Q108 52 108 65 Q108 78 90 78" stroke="#7a3a10" stroke-width="7" fill="none" stroke-linecap="round"/>
+        <path d="M90 52 Q104 52 104 65 Q104 74 90 74" stroke="#a0522d" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+        <!-- shine -->
+        <path d="M30 60 Q32 52 38 54" stroke="rgba(255,251,230,0.15)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <defs>
+          <linearGradient id="cup-grad" x1="20" y1="45" x2="90" y2="85" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#a0522d"/>
+            <stop offset="100%" stop-color="#6b3010"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+
+    <h1>Chai pe aao ☕</h1>
+    <p>Take a 5-minute mental break with strangers. No agenda. Just chai.</p>
+    <button class="btn-join" onclick="enterRoom()">Join the Tapri</button>
+    <div class="splash-sub">Anonymous · No signup · Just vibes</div>
+  </div>
+
+  <!-- =================== MAIN ROOM =================== -->
+  <div id="room">
+
+    <div class="room-header">
+      <div class="header-top">
+        <div class="tapri-title" id="room-title">☕ Chai Tapri</div>
+        <button class="sutta-toggle" id="sutta-btn" onclick="toggleSutta()">🚬 Sutta Break</button>
+      </div>
+
+      <div class="live-count">
+        <span class="live-dot"></span>
+        <span><span id="people-count">47</span> people on chai break right now</span>
+      </div>
+
+      <div class="avatars" id="avatars"></div>
+    </div>
+
+    <!-- Timer -->
+    <div class="timer-section">
+      <div class="timer-ring-wrapper">
+        <svg class="timer-ring-svg" viewBox="0 0 120 120">
+          <circle class="ring-bg"       cx="60" cy="60" r="54"/>
+          <circle class="ring-progress" cx="60" cy="60" r="54" id="ring"/>
+        </svg>
+        <div class="timer-display">
+          <div class="timer-label">Your break</div>
+          <div class="timer-time" id="timer-display">05:00</div>
+        </div>
+      </div>
+
+      <div class="sip-area">
+        <button class="btn-sip" id="sip-btn" onclick="takeSip()">
+          <span class="steam-puff" id="steam-puff"></span>
+          ☕ Take a Sip
+        </button>
+        <div class="sip-counter">
+          <span class="sip-count-num" id="sip-num">0</span>
+          sips today
+        </div>
+      </div>
+    </div>
+
+    <!-- One-liner wall -->
+    <div class="wall-section">
+      <div class="wall-header">
+        <span>tapri chatter</span>
+        <div class="wall-divider"></div>
+      </div>
+      <div id="feed"></div>
+    </div>
+
+    <!-- Post input -->
+    <div class="post-section">
+      <div class="post-form">
+        <input
+          type="text"
+          class="post-input"
+          id="post-input"
+          placeholder="Share something..."
+          maxlength="60"
+          oninput="updateCharCount()"
+          onkeydown="if(event.key==='Enter') postMessage()"
+        />
+        <button class="btn-post" onclick="postMessage()">Post</button>
+      </div>
+      <div class="char-count" id="char-count">0 / 60</div>
+    </div>
+
+    <footer>
+      No accounts. No data. Just chai.
+      <br>
+      <span class="wiggle-cup">☕</span>
+    </footer>
+
+  </div>
+
+  <div id="toast"></div>
+</div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────
+let timerSeconds = 300;
+let timerInterval = null;
+let sipsToday = 0;
+let peopleCount = randomPeople();
+let isSutta = false;
+let feedInterval = null;
+
+const CIRCUMFERENCE = 2 * Math.PI * 54; // ~339.29
+
+// ─── AUDIO (Web Audio API) ────────────────────────────────
+let audioCtx = null;
+
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function playSip() {
+  try {
+    const ctx = getAudioCtx();
+    if (ctx.state === 'suspended') ctx.resume();
+    const now = ctx.currentTime;
+
+    // slurp: descending pitch sweep + noise burble
+    const osc1 = ctx.createOscillator();
+    const gain1 = ctx.createGain();
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
+
+    osc1.type = 'sawtooth';
+    osc1.frequency.setValueAtTime(600, now);
+    osc1.frequency.exponentialRampToValueAtTime(180, now + 0.18);
+    gain1.gain.setValueAtTime(0, now);
+    gain1.gain.linearRampToValueAtTime(0.13, now + 0.02);
+    gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+
+    osc2.type = 'sine';
+    osc2.frequency.setValueAtTime(900, now + 0.05);
+    osc2.frequency.exponentialRampToValueAtTime(300, now + 0.25);
+    gain2.gain.setValueAtTime(0, now + 0.05);
+    gain2.gain.linearRampToValueAtTime(0.09, now + 0.07);
+    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+
+    osc1.connect(gain1); gain1.connect(ctx.destination);
+    osc2.connect(gain2); gain2.connect(ctx.destination);
+
+    osc1.start(now);   osc1.stop(now + 0.25);
+    osc2.start(now + 0.05); osc2.stop(now + 0.3);
+  } catch(e) {}
+}
+
+function playBell() {
+  try {
+    const ctx = getAudioCtx();
+    if (ctx.state === 'suspended') ctx.resume();
+    const now = ctx.currentTime;
+
+    [523.25, 659.25, 783.99].forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0, now + i * 0.22);
+      gain.gain.linearRampToValueAtTime(0.18, now + i * 0.22 + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.22 + 1.2);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(now + i * 0.22);
+      osc.stop(now + i * 0.22 + 1.3);
+    });
+  } catch(e) {}
+}
+
+// ─── PEOPLE / AVATARS ─────────────────────────────────────
+function randomPeople() {
+  return Math.floor(Math.random() * (67 - 23 + 1)) + 23;
+}
+
+const AVATAR_COLORS = [
+  '#c0392b','#e67e22','#27ae60','#2980b9',
+  '#8e44ad','#16a085','#d35400','#2c3e50',
+  '#f39c12','#1abc9c','#e91e63','#3f51b5',
+];
+const FAKE_INITIALS = [
+  'RK','PS','AM','VJ','NK','SB','DM','KP',
+  'AK','MP','RS','HG','TN','LP','WR','BT',
+];
+
+function renderAvatars() {
+  const el = document.getElementById('avatars');
+  el.innerHTML = '';
+  const count = Math.min(6, Math.ceil(peopleCount / 10));
+  const seen = new Set();
+  let placed = 0;
+  while (placed < count) {
+    const idx = Math.floor(Math.random() * FAKE_INITIALS.length);
+    if (seen.has(idx)) continue;
+    seen.add(idx);
+    const div = document.createElement('div');
+    div.className = 'avatar';
+    div.textContent = FAKE_INITIALS[idx];
+    div.style.background = AVATAR_COLORS[idx % AVATAR_COLORS.length];
+    el.appendChild(div);
+    placed++;
+  }
+}
+
+// ─── SPLASH → ROOM ────────────────────────────────────────
+function enterRoom() {
+  document.getElementById('splash').style.display = 'none';
+  const room = document.getElementById('room');
+  room.classList.add('visible');
+
+  document.getElementById('people-count').textContent = peopleCount;
+  renderAvatars();
+  startTimer();
+  startFeed();
+  startPeopleUpdate();
+}
+
+// ─── TIMER ────────────────────────────────────────────────
+function startTimer() {
+  timerSeconds = 300;
+  updateTimerDisplay();
+  timerInterval = setInterval(tickTimer, 1000);
+}
+
+function tickTimer() {
+  timerSeconds--;
+  if (timerSeconds < 0) timerSeconds = 0;
+  updateTimerDisplay();
+  if (timerSeconds === 0) {
+    clearInterval(timerInterval);
+    onBreakEnd();
+  }
+}
+
+function updateTimerDisplay() {
+  const m = String(Math.floor(timerSeconds / 60)).padStart(2, '0');
+  const s = String(timerSeconds % 60).padStart(2, '0');
+  document.getElementById('timer-display').textContent = `${m}:${s}`;
+
+  const fraction = timerSeconds / 300;
+  const offset = CIRCUMFERENCE * (1 - fraction);
+  document.getElementById('ring').style.strokeDashoffset = offset;
+
+  // dim ring as time runs out
+  const r = document.getElementById('ring');
+  if (fraction < 0.2) {
+    r.style.stroke = '#e74c3c';
+  } else {
+    r.style.stroke = isSutta ? '#c8a2e8' : '#f4a460';
+  }
+}
+
+function onBreakEnd() {
+  playBell();
+  showToast('Break over. You survived. Go back. 🫡', 5000);
+  document.getElementById('timer-display').textContent = 'Done!';
+}
+
+// ─── SIP ──────────────────────────────────────────────────
+function takeSip() {
+  sipsToday++;
+  document.getElementById('sip-num').textContent = sipsToday;
+  playSip();
+
+  const btn = document.getElementById('sip-btn');
+  const puff = document.getElementById('steam-puff');
+  btn.classList.remove('sipping');
+  void btn.offsetWidth; // reflow
+  btn.classList.add('sipping');
+  setTimeout(() => btn.classList.remove('sipping'), 700);
+
+  if (sipsToday === 5) showToast('Chai #5. Certified addict. 🏆', 3000);
+  else if (sipsToday === 10) showToast('Tenth sip. Doctor ki advice mat lo. 😅', 3000);
+}
+
+// ─── FEED ─────────────────────────────────────────────────
+const CHAI_MESSAGES = [
+  'Monday se gym pakka 💪',
+  'Boss finally in a meeting 🎉',
+  'Chai #4 of the day. No regrets.',
+  'Deadline hai but chai pehle',
+  'Team call mute karke yahan hu 🤫',
+  'Kuch nahi karna hai aaj',
+  'Imposter syndrome hit different today',
+  'Just shipped something. Need chai.',
+  'WFH = Work From Haveli 🏡',
+  'Meeting could\'ve been an email',
+  'Pretending to work since 9 AM',
+  'Next slide please... into retirement',
+  'Kal karenge. Aaj chai.',
+  '3 PM slump hit early today',
+  'Inbox: 247 unread. Vibe: chill.',
+  'My camera is off. I could be anywhere.',
+  'Chai > coffee. Fight me.',
+  'Friday energy on a Wednesday',
+  'PR raised. Chai deserved.',
+  'LinkedIn grind can wait.',
+];
+
+const SUTTA_MESSAGES = [
+  'Corporate ladder sirf ek illusion hai 🪜',
+  'KPI kya hota hai actually?',
+  'Synergy is just a fancy word for nothing',
+  'Appraisal ka wait karte karte boodha hogaya',
+  '30-minute stand-up. Nothing stood up.',
+  'Pivoting to "sabbatical"',
+  'My biggest achievement: surviving Q3',
+  'Passion projects vs. EMIs: EMIs win',
+  'Return to office notice: aayenge kabhi',
+  'Work-life balance is a myth bhai',
+  '"Growth opportunity" = more work, same pay',
+  'Hustle culture can go eat sand',
+  'Out of office: mentally, always.',
+  'Promotion committee mein sirf ghosts',
+  '"We\'re like a family" — red flag 🚩',
+];
+
+function currentMessages() {
+  return isSutta ? SUTTA_MESSAGES : CHAI_MESSAGES;
+}
+
+let msgIndex = 0;
+
+function startFeed() {
+  // seed with 3 messages
+  for (let i = 0; i < 3; i++) {
+    const msgs = currentMessages();
+    addMessage(msgs[(msgIndex++) % msgs.length], false, false);
+  }
+
+  feedInterval = setInterval(() => {
+    const msgs = currentMessages();
+    addMessage(msgs[(msgIndex++) % msgs.length], false, false);
+  }, 9000 + Math.random() * 2000);
+}
+
+function addMessage(text, isYou = false, scrollNow = true) {
+  const feed = document.getElementById('feed');
+
+  // now
+  const d = new Date();
+  const t = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+
+  const div = document.createElement('div');
+  div.className = 'msg' + (isYou ? ' you' : '');
+  div.innerHTML = `${escHtml(text)}${isYou ? '<span class="msg-you-tag">(you)</span>' : ''}<span class="msg-time">${t}</span>`;
+
+  // prepend (newest at top)
+  feed.insertBefore(div, feed.firstChild);
+
+  // cap at 30 messages
+  while (feed.children.length > 30) feed.removeChild(feed.lastChild);
+
+  if (scrollNow) {
+    feed.scrollTop = 0;
+  }
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ─── POST ─────────────────────────────────────────────────
+function postMessage() {
+  const input = document.getElementById('post-input');
+  const text = input.value.trim();
+  if (!text) return;
+  addMessage(text, true, true);
+  input.value = '';
+  updateCharCount();
+}
+
+function updateCharCount() {
+  const input = document.getElementById('post-input');
+  const len = input.value.length;
+  const el = document.getElementById('char-count');
+  el.textContent = `${len} / 60`;
+  el.classList.toggle('warn', len >= 50);
+}
+
+// ─── PEOPLE COUNT ─────────────────────────────────────────
+function startPeopleUpdate() {
+  setInterval(() => {
+    // drift by ±3
+    peopleCount = Math.max(23, Math.min(67, peopleCount + Math.floor(Math.random() * 7) - 3));
+    document.getElementById('people-count').textContent = peopleCount;
+    renderAvatars();
+  }, 30000);
+}
+
+// ─── SUTTA MODE ───────────────────────────────────────────
+function toggleSutta() {
+  isSutta = !isSutta;
+  document.body.classList.toggle('sutta-mode', isSutta);
+
+  const btn = document.getElementById('sutta-btn');
+  const title = document.getElementById('room-title');
+
+  if (isSutta) {
+    btn.classList.add('active');
+    btn.textContent = '☕ Chai Break';
+    title.textContent = '🚬 Sutta Tapri';
+    showToast('Sutta mode on. Dark thoughts only. 🌑', 2500);
+  } else {
+    btn.classList.remove('active');
+    btn.textContent = '🚬 Sutta Break';
+    title.textContent = '☕ Chai Tapri';
+    showToast('Back to chai. Sab theek hai. ☕', 2000);
+  }
+
+  // clear old feed, restart
+  clearInterval(feedInterval);
+  document.getElementById('feed').innerHTML = '';
+  msgIndex = 0;
+  startFeed();
+}
+
+// ─── TOAST ────────────────────────────────────────────────
+let toastTimeout = null;
+function showToast(msg, duration = 3000) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => toast.classList.remove('show'), duration);
+}
+</script>
+</body>
+</html>

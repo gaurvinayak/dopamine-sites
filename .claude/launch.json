@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "left-on-read",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "left-on-read", "-l", "3700", "--no-clipboard"],
+      "port": 3700
+    },
+    {
+      "name": "ship-it",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "ship-it", "-l", "3701", "--no-clipboard"],
+      "port": 3701
+    }
+  ]
+}

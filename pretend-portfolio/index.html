@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PretendTrade — Virtual Trading Terminal</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0a;
+    --panel: #0f0f1a;
+    --panel2: #1a1a2e;
+    --panel3: #16213e;
+    --border: #2a2a4a;
+    --green: #00ff88;
+    --green-dim: #00cc6a;
+    --red: #ff4444;
+    --red-dim: #cc2222;
+    --amber: #ffd700;
+    --text: #e0e0e0;
+    --text-dim: #888;
+    --blue: #4fc3f7;
+    --purple: #9c88ff;
+    --font: 'Fira Code', 'Courier New', monospace;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 13px;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── REKT OVERLAY ── */
+  #rekt-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(255, 0, 0, 0.15);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 20px;
+  }
+  #rekt-overlay.active { display: flex; animation: screenShake 0.5s ease infinite; }
+  #rekt-box {
+    background: #1a0000;
+    border: 2px solid var(--red);
+    border-radius: 12px;
+    padding: 40px 60px;
+    text-align: center;
+    box-shadow: 0 0 60px rgba(255,68,68,0.5);
+  }
+  #rekt-box h1 { font-size: 48px; color: var(--red); margin-bottom: 10px; }
+  #rekt-box .rekt-amount { font-size: 28px; color: var(--amber); margin: 10px 0; }
+  #rekt-box p { color: #ccc; font-size: 16px; }
+  #rekt-box button {
+    margin-top: 24px;
+    padding: 12px 28px;
+    background: var(--red);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-family: var(--font);
+    font-size: 14px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  #rekt-box button:hover { background: #ff6666; }
+
+  @keyframes screenShake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-8px) rotate(-0.5deg); }
+    40% { transform: translateX(8px) rotate(0.5deg); }
+    60% { transform: translateX(-5px); }
+    80% { transform: translateX(5px); }
+  }
+
+  /* ── MODAL ── */
+  #modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+  }
+  #modal-overlay.active { display: flex; }
+  #modal-box {
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 28px 32px;
+    min-width: 340px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  }
+  #modal-box h3 { color: var(--amber); margin-bottom: 16px; font-size: 15px; }
+  #modal-details { color: var(--text); margin-bottom: 20px; line-height: 1.8; }
+  #modal-details .highlight { color: var(--amber); font-weight: 600; }
+  .modal-btns { display: flex; gap: 10px; }
+  .modal-btns button {
+    flex: 1; padding: 10px; border: none; border-radius: 6px;
+    font-family: var(--font); font-size: 13px; cursor: pointer; font-weight: 600;
+  }
+  #modal-confirm { background: var(--green); color: #000; }
+  #modal-confirm:hover { background: var(--green-dim); }
+  #modal-cancel { background: var(--panel3); color: var(--text); border: 1px solid var(--border); }
+  #modal-cancel:hover { background: var(--panel2); }
+
+  /* ── TOAST ── */
+  #toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 5000;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .toast {
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 500;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    animation: toastIn 0.3s ease, toastOut 0.3s ease 2.7s forwards;
+    min-width: 240px;
+  }
+  .toast.success { background: #003322; border: 1px solid var(--green); color: var(--green); }
+  .toast.error { background: #220000; border: 1px solid var(--red); color: var(--red); }
+  .toast.info { background: #1a1a00; border: 1px solid var(--amber); color: var(--amber); }
+  @keyframes toastIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+  @keyframes toastOut { from { opacity: 1; } to { opacity: 0; transform: translateX(30px); } }
+
+  /* ── LAYOUT ── */
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 12px 40px;
+  }
+
+  /* ── HEADER BAR ── */
+  .header {
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .brand { font-size: 15px; font-weight: 700; color: var(--blue); letter-spacing: 1px; }
+  .brand span { color: var(--amber); }
+  .header-stats { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+  .stat-item { display: flex; flex-direction: column; align-items: flex-end; }
+  .stat-label { font-size: 10px; color: var(--text-dim); letter-spacing: 1px; text-transform: uppercase; }
+  .stat-value { font-size: 15px; font-weight: 600; transition: color 0.3s; }
+  .stat-value.green { color: var(--green); }
+  .stat-value.red { color: var(--red); }
+  .stat-value.amber { color: var(--amber); }
+  .flash-green { animation: flashGreen 0.4s ease; }
+  .flash-red { animation: flashRed 0.4s ease; }
+  @keyframes flashGreen {
+    0%, 100% { background: transparent; }
+    50% { background: rgba(0,255,136,0.15); border-radius: 4px; }
+  }
+  @keyframes flashRed {
+    0%, 100% { background: transparent; }
+    50% { background: rgba(255,68,68,0.15); border-radius: 4px; }
+  }
+
+  .btn-reset {
+    padding: 6px 14px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    border-radius: 5px;
+    font-family: var(--font);
+    font-size: 11px;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+  }
+  .btn-reset:hover { border-color: var(--red); color: var(--red); }
+
+  /* ── TICKER TAPE ── */
+  .ticker-wrap {
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+    height: 36px;
+    display: flex;
+    align-items: center;
+  }
+  .ticker-inner {
+    display: flex;
+    gap: 0;
+    animation: tickerScroll 28s linear infinite;
+    white-space: nowrap;
+  }
+  .ticker-inner:hover { animation-play-state: paused; }
+  @keyframes tickerScroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  .tick-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 24px;
+    border-right: 1px solid var(--border);
+    height: 36px;
+  }
+  .tick-sym { color: var(--text-dim); font-size: 11px; font-weight: 600; letter-spacing: 1px; }
+  .tick-price { font-size: 12px; font-weight: 600; color: var(--text); transition: color 0.4s; }
+  .tick-chg { font-size: 11px; transition: color 0.4s; }
+  .tick-chg.up { color: var(--green); }
+  .tick-chg.dn { color: var(--red); }
+  .tick-item.meme .tick-sym { color: var(--purple); }
+  .tick-item.meme .tick-price { color: var(--purple); }
+
+  /* ── MAIN GRID ── */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 12px;
+    margin-top: 12px;
+  }
+  .left-col { display: flex; flex-direction: column; gap: 12px; }
+  .right-col { display: flex; flex-direction: column; gap: 12px; }
+
+  /* ── PANELS ── */
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    background: var(--panel2);
+  }
+  .panel-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  .panel-body { padding: 14px; }
+
+  /* ── CHART TABS ── */
+  .tab-bar { display: flex; gap: 4px; }
+  .tab-btn {
+    padding: 4px 10px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    border-radius: 4px;
+    font-family: var(--font);
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tab-btn.active { background: var(--panel3); color: var(--blue); border-color: var(--blue); }
+  .tab-btn:hover:not(.active) { border-color: var(--text-dim); color: var(--text); }
+
+  /* ── CHART SVG ── */
+  #chart-wrap {
+    position: relative;
+    height: 200px;
+    margin-top: 4px;
+  }
+  #chart-svg {
+    width: 100%;
+    height: 100%;
+  }
+  .chart-label {
+    position: absolute;
+    top: 4px;
+    right: 8px;
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+  #chart-stock-name {
+    position: absolute;
+    top: 4px;
+    left: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--blue);
+  }
+  #chart-stock-price {
+    position: absolute;
+    top: 20px;
+    left: 8px;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  /* ── BUY/SELL PANEL ── */
+  .order-form { display: flex; flex-direction: column; gap: 10px; }
+  .form-row { display: flex; flex-direction: column; gap: 4px; }
+  .form-label { font-size: 10px; color: var(--text-dim); letter-spacing: 1px; text-transform: uppercase; }
+  .form-select, .form-input {
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 10px;
+    border-radius: 5px;
+    font-family: var(--font);
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-select:focus, .form-input:focus { border-color: var(--blue); }
+  .form-select option { background: var(--panel2); }
+  .order-type-bar {
+    display: flex;
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    overflow: hidden;
+  }
+  .order-type-btn {
+    flex: 1;
+    padding: 7px;
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    font-family: var(--font);
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+  }
+  .order-type-btn.active { background: var(--panel3); color: var(--blue); }
+  .est-cost {
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 8px 10px;
+    font-size: 12px;
+    color: var(--amber);
+    display: flex;
+    justify-content: space-between;
+  }
+  .est-cost span:first-child { color: var(--text-dim); }
+  .buy-sell-row { display: flex; gap: 8px; }
+  .btn-buy, .btn-sell {
+    flex: 1;
+    padding: 11px;
+    border: none;
+    border-radius: 6px;
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-buy { background: var(--green); color: #000; }
+  .btn-buy:hover { background: #00ff99; transform: translateY(-1px); }
+  .btn-buy:active { transform: translateY(0); }
+  .btn-sell { background: var(--red); color: #fff; }
+  .btn-sell:hover { background: #ff6666; transform: translateY(-1px); }
+  .btn-sell:active { transform: translateY(0); }
+
+  /* ── HOLDINGS TABLE ── */
+  .holdings-table { width: 100%; border-collapse: collapse; }
+  .holdings-table th {
+    text-align: left;
+    padding: 6px 8px;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+  }
+  .holdings-table td {
+    padding: 8px 8px;
+    font-size: 12px;
+    border-bottom: 1px solid rgba(42,42,74,0.5);
+    vertical-align: middle;
+  }
+  .holdings-table tr:last-child td { border-bottom: none; }
+  .holding-sym { font-weight: 700; color: var(--blue); }
+  .holding-sym.meme { color: var(--purple); }
+  .holding-pnl { font-weight: 600; }
+  .holding-pnl.pos { color: var(--green); }
+  .holding-pnl.neg { color: var(--red); }
+  .no-holdings { text-align: center; color: var(--text-dim); padding: 28px; font-size: 12px; }
+  .holdings-total {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 8px 2px;
+    border-top: 1px solid var(--border);
+    margin-top: 4px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .holdings-total span:last-child { }
+
+  /* ── MEME PANEL ── */
+  .meme-panel {
+    background: linear-gradient(135deg, #0a0020, #1a0030, #0a001a);
+    border: 1px solid #6633cc;
+    border-radius: 8px;
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .meme-panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(156,136,255,0.1), transparent 70%);
+    pointer-events: none;
+  }
+  .meme-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .meme-name { font-size: 13px; font-weight: 700; color: var(--purple); letter-spacing: 2px; }
+  .meme-badge {
+    font-size: 10px;
+    background: #330055;
+    color: var(--purple);
+    border: 1px solid #6633cc;
+    padding: 2px 8px;
+    border-radius: 20px;
+  }
+  .meme-price-big { font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 2px; }
+  .meme-gain { font-size: 15px; font-weight: 700; color: var(--green); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .rocket { display: inline-block; animation: rocketBounce 1s ease-in-out infinite; font-size: 18px; }
+  @keyframes rocketBounce {
+    0%, 100% { transform: translateY(0) rotate(-45deg); }
+    50% { transform: translateY(-6px) rotate(-45deg); }
+  }
+  .meme-desc { font-size: 11px; color: #9977cc; margin-bottom: 12px; line-height: 1.5; }
+  .btn-allin {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #6633cc, #9c44ff);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .btn-allin:hover { background: linear-gradient(135deg, #7744dd, #aa55ff); transform: translateY(-1px); box-shadow: 0 4px 20px rgba(153,68,255,0.4); }
+  .btn-allin:active { transform: translateY(0); }
+  .meme-warning { font-size: 10px; color: #664488; text-align: center; margin-top: 8px; }
+
+  /* Stars bg for meme */
+  .stars {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .star {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: white;
+    border-radius: 50%;
+    animation: twinkle 2s ease-in-out infinite;
+  }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.1; }
+    50% { opacity: 0.8; }
+  }
+
+  /* ── MARKET STATUS ── */
+  .market-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+  .status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse 2s ease infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(0,255,136,0.4); }
+    50% { box-shadow: 0 0 0 4px rgba(0,255,136,0); }
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    text-align: center;
+    padding: 20px 12px 10px;
+    color: var(--text-dim);
+    font-size: 11px;
+    border-top: 1px solid var(--border);
+    margin-top: 20px;
+    line-height: 1.8;
+  }
+  .footer a { color: var(--blue); text-decoration: none; }
+
+  /* ── SELL BTN in holdings ── */
+  .btn-sell-sm {
+    padding: 3px 8px;
+    background: transparent;
+    border: 1px solid var(--red);
+    color: var(--red);
+    border-radius: 3px;
+    font-family: var(--font);
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-sell-sm:hover { background: var(--red); color: white; }
+
+  /* ── CHART CANDLES ── */
+  .candle-up { fill: var(--green); }
+  .candle-dn { fill: var(--red); }
+  .wick-up { stroke: var(--green); stroke-width: 1; }
+  .wick-dn { stroke: var(--red); stroke-width: 1; }
+  .chart-line { fill: none; stroke: var(--green); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .chart-area { fill: url(#areaGrad); }
+  .grid-line { stroke: rgba(42,42,74,0.6); stroke-width: 1; stroke-dasharray: 3,3; }
+  .price-label { fill: #555; font-family: 'Fira Code', monospace; font-size: 9px; }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: var(--panel); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  @media (max-width: 680px) {
+    .main-grid { grid-template-columns: 1fr; }
+    .header-stats { gap: 12px; }
+    .stat-value { font-size: 13px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- REKT OVERLAY -->
+<div id="rekt-overlay">
+  <div id="rekt-box">
+    <h1>REKT 🔥</h1>
+    <div class="rekt-amount" id="rekt-amount">-₹0</div>
+    <p>MOONMEME dumped -99%.<br>This is fine. 🔥</p>
+    <button onclick="closeRekt()">I accept my fate</button>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div id="modal-overlay">
+  <div id="modal-box">
+    <h3>Confirm Order</h3>
+    <div id="modal-details"></div>
+    <div class="modal-btns">
+      <button id="modal-confirm" onclick="confirmOrder()">Confirm</button>
+      <button id="modal-cancel" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div id="toast-container"></div>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-inner">
+    <div class="brand">PRETEND<span>TRADE</span></div>
+    <div class="header-stats">
+      <div class="stat-item">
+        <span class="stat-label">Virtual Balance</span>
+        <span class="stat-value amber" id="balance-display">₹1,00,000</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Total P&amp;L</span>
+        <span class="stat-value green" id="pnl-display">+₹0 (0.00%)</span>
+      </div>
+      <div class="market-status">
+        <div class="status-dot"></div>
+        <span>LIVE</span>
+      </div>
+    </div>
+    <button class="btn-reset" onclick="resetPortfolio()">↺ Start fresh</button>
+  </div>
+</header>
+
+<!-- TICKER TAPE -->
+<div class="ticker-wrap">
+  <div class="ticker-inner" id="ticker-inner">
+    <!-- duplicated for infinite scroll -->
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="container">
+  <div class="main-grid">
+    <!-- LEFT COLUMN -->
+    <div class="left-col">
+
+      <!-- CHART -->
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">Price Chart</span>
+          <div class="tab-bar">
+            <button class="tab-btn active" onclick="setTimeframe('1D', this)">1D</button>
+            <button class="tab-btn" onclick="setTimeframe('1W', this)">1W</button>
+            <button class="tab-btn" onclick="setTimeframe('1M', this)">1M</button>
+          </div>
+        </div>
+        <div class="panel-body" style="padding:10px 14px 14px;">
+          <div id="chart-wrap">
+            <div id="chart-stock-name">RELIANCE</div>
+            <div id="chart-stock-price">₹2,847</div>
+            <div class="chart-label" id="chart-tf">1D</div>
+            <svg id="chart-svg" viewBox="0 0 700 200" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#00ff88" stop-opacity="0.3"/>
+                  <stop offset="100%" stop-color="#00ff88" stop-opacity="0.02"/>
+                </linearGradient>
+              </defs>
+              <g id="chart-grid"></g>
+              <g id="chart-candles"></g>
+              <path id="chart-area-path" class="chart-area"/>
+              <path id="chart-line-path" class="chart-line"/>
+              <g id="chart-labels"></g>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- HOLDINGS -->
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">Holdings</span>
+          <span style="font-size:11px;color:var(--text-dim)" id="holdings-count">0 positions</span>
+        </div>
+        <div class="panel-body" style="padding:0;">
+          <div id="holdings-body">
+            <div class="no-holdings">No positions yet. Buy something!</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="right-col">
+
+      <!-- ORDER PANEL -->
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">Place Order</span>
+          <span style="font-size:10px;color:var(--text-dim)">MARKET</span>
+        </div>
+        <div class="panel-body">
+          <div class="order-form">
+            <div class="form-row">
+              <label class="form-label">Stock</label>
+              <select class="form-select" id="order-stock" onchange="updateOrderPanel()">
+                <option value="RELIANCE">RELIANCE</option>
+                <option value="TCS">TCS</option>
+                <option value="INFY">INFY</option>
+                <option value="HDFC">HDFC</option>
+                <option value="MOONMEME">MOONMEME 🚀</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label class="form-label">Quantity</label>
+              <input class="form-input" type="number" id="order-qty" min="1" value="1" oninput="updateOrderPanel()">
+            </div>
+            <div class="order-type-bar">
+              <button class="order-type-btn active">Market</button>
+              <button class="order-type-btn" style="color:var(--text-dim);opacity:0.5;cursor:default;">Limit</button>
+              <button class="order-type-btn" style="color:var(--text-dim);opacity:0.5;cursor:default;">SL-M</button>
+            </div>
+            <div class="est-cost">
+              <span>Estimated cost</span>
+              <span id="est-cost-val">₹2,847</span>
+            </div>
+            <div class="buy-sell-row">
+              <button class="btn-buy" onclick="placeOrder('BUY')">BUY</button>
+              <button class="btn-sell" onclick="placeOrder('SELL')">SELL</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MEME COIN PANEL -->
+      <div class="meme-panel">
+        <div class="stars" id="stars-container"></div>
+        <div class="meme-header">
+          <span class="meme-name">MOONMEME</span>
+          <span class="meme-badge">DEGEN</span>
+        </div>
+        <div class="meme-price-big" id="meme-price-big">₹0.0042</div>
+        <div class="meme-gain"><span class="rocket">🚀</span><span id="meme-gain-big">+847.3%</span></div>
+        <div class="meme-desc">
+          Total supply: 420,690,000,000<br>
+          Backed by: vibes only<br>
+          Dev wallet: still here 👀
+        </div>
+        <button class="btn-allin" onclick="goAllIn()">All in? 🌕</button>
+        <div class="meme-warning">* Past performance is not indicative of future results.<br>This is definitely going to $1.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer class="footer">
+    Virtual money only. Your real portfolio is your problem. | PretendTrade v1.0 | No SEBI registration required.
+  </footer>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+//  STATE
+// ─────────────────────────────────────────────
+const INITIAL_BALANCE = 100000;
+
+let state = loadState();
+
+function defaultState() {
+  return {
+    balance: INITIAL_BALANCE,
+    holdings: {}, // { sym: { qty, avgPrice } }
+  };
+}
+
+function loadState() {
+  try {
+    const s = localStorage.getItem('pretendtrade_v1');
+    if (s) return JSON.parse(s);
+  } catch(e) {}
+  return defaultState();
+}
+
+function saveState() {
+  localStorage.setItem('pretendtrade_v1', JSON.stringify(state));
+}
+
+// ─────────────────────────────────────────────
+//  STOCKS DATA
+// ─────────────────────────────────────────────
+const STOCKS = {
+  RELIANCE: { base: 2847, vol: 0.012, label: 'Reliance Ind.' },
+  TCS:      { base: 3912, vol: 0.008, label: 'TCS' },
+  INFY:     { base: 1634, vol: 0.015, label: 'Infosys' },
+  HDFC:     { base: 1756, vol: 0.010, label: 'HDFC Bank' },
+  MOONMEME: { base: 0.0042, vol: 0.08, label: 'MoonMeme Coin', isMeme: true },
+};
+
+let prices = {};
+let prevPrices = {};
+let baseChg = {}; // daily change % for display
+
+function initPrices() {
+  for (const sym in STOCKS) {
+    const s = STOCKS[sym];
+    // small random offset from base
+    prices[sym] = s.base * (1 + (Math.random() - 0.5) * 0.02);
+    prevPrices[sym] = prices[sym];
+    baseChg[sym] = (Math.random() - 0.45) * 3; // -1.35% to +1.65%
+  }
+  // MOONMEME always starts looking great
+  baseChg['MOONMEME'] = 847.3;
+}
+
+initPrices();
+
+// ─────────────────────────────────────────────
+//  PRICE TICKING
+// ─────────────────────────────────────────────
+function tickPrices() {
+  for (const sym in STOCKS) {
+    if (sym === 'MOONMEME' && memeRekting) continue;
+    const s = STOCKS[sym];
+    prevPrices[sym] = prices[sym];
+    const drift = (Math.random() - 0.49) * s.vol;
+    prices[sym] = prices[sym] * (1 + drift);
+    // keep near base ±15%
+    const lo = s.base * 0.85, hi = s.base * 1.15;
+    if (prices[sym] < lo) prices[sym] = lo * (1 + Math.random() * 0.01);
+    if (prices[sym] > hi) prices[sym] = hi * (1 - Math.random() * 0.01);
+    // daily change stays anchored
+    baseChg[sym] += (Math.random() - 0.5) * 0.05;
+    if (sym !== 'MOONMEME') {
+      baseChg[sym] = Math.max(-8, Math.min(8, baseChg[sym]));
+    }
+  }
+  renderTicker();
+  updateOrderPanel();
+  renderHoldings();
+  renderPnL();
+}
+
+// ─────────────────────────────────────────────
+//  FORMAT HELPERS
+// ─────────────────────────────────────────────
+function fmt(n, decimals) {
+  if (n === undefined || n === null) return '0';
+  if (Math.abs(n) < 1) return n.toFixed(4);
+  return n.toLocaleString('en-IN', {
+    minimumFractionDigits: decimals || 2,
+    maximumFractionDigits: decimals || 2
+  });
+}
+
+function fmtInr(n) {
+  if (Math.abs(n) < 1) return '₹' + n.toFixed(4);
+  return '₹' + fmt(n);
+}
+
+function fmtChg(n) {
+  const sign = n >= 0 ? '+' : '';
+  return sign + n.toFixed(2) + '%';
+}
+
+// ─────────────────────────────────────────────
+//  TICKER TAPE
+// ─────────────────────────────────────────────
+function buildTickerHTML() {
+  let html = '';
+  const syms = Object.keys(STOCKS);
+  // duplicate for infinite scroll
+  for (let pass = 0; pass < 2; pass++) {
+    for (const sym of syms) {
+      const isMeme = STOCKS[sym].isMeme;
+      const chg = baseChg[sym];
+      const cls = chg >= 0 ? 'up' : 'dn';
+      const price = isMeme ? '₹' + prices[sym].toFixed(4) : fmtInr(prices[sym]);
+      html += `<div class="tick-item${isMeme ? ' meme' : ''}">
+        <span class="tick-sym">${sym}</span>
+        <span class="tick-price" id="${pass===0 ? 'tp-'+sym : 'tp2-'+sym}">${price}</span>
+        <span class="tick-chg ${cls}" id="${pass===0 ? 'tc-'+sym : 'tc2-'+sym}">${fmtChg(chg)}</span>
+      </div>`;
+    }
+  }
+  return html;
+}
+
+function renderTicker() {
+  for (const sym in STOCKS) {
+    const isMeme = STOCKS[sym].isMeme;
+    const chg = baseChg[sym];
+    const cls = chg >= 0 ? 'up' : 'dn';
+    const price = isMeme ? '₹' + prices[sym].toFixed(4) : fmtInr(prices[sym]);
+    for (const pfx of ['tp-', 'tp2-']) {
+      const el = document.getElementById(pfx + sym);
+      if (el) el.textContent = price;
+    }
+    for (const pfx of ['tc-', 'tc2-']) {
+      const el = document.getElementById(pfx + sym);
+      if (el) {
+        el.textContent = fmtChg(chg);
+        el.className = 'tick-chg ' + cls;
+      }
+    }
+  }
+  // Update meme panel
+  document.getElementById('meme-price-big').textContent = '₹' + prices['MOONMEME'].toFixed(4);
+  const mg = document.getElementById('meme-gain-big');
+  mg.textContent = fmtChg(baseChg['MOONMEME']);
+}
+
+// Init ticker
+document.getElementById('ticker-inner').innerHTML = buildTickerHTML();
+
+// ─────────────────────────────────────────────
+//  CHART
+// ─────────────────────────────────────────────
+let currentTimeframe = '1D';
+let chartSym = 'RELIANCE';
+
+function setTimeframe(tf, btn) {
+  currentTimeframe = tf;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('chart-tf').textContent = tf;
+  drawChart();
+}
+
+function drawChart() {
+  const sym = document.getElementById('order-stock').value;
+  chartSym = sym;
+  const isMeme = STOCKS[sym].isMeme;
+  const price = prices[sym];
+  const tf = currentTimeframe;
+
+  document.getElementById('chart-stock-name').textContent = sym;
+  document.getElementById('chart-stock-price').textContent = isMeme
+    ? '₹' + price.toFixed(4)
+    : fmtInr(price);
+
+  const W = 700, H = 200;
+  const padL = 8, padR = 48, padT = 30, padB = 20;
+  const chartW = W - padL - padR;
+  const chartH = H - padT - padB;
+
+  // Generate price walk
+  const N = tf === '1D' ? 78 : tf === '1W' ? 120 : 200;
+  const walk = [];
+  let p = price * (1 - (Math.random() * 0.08 + 0.02));
+  const trend = isMeme ? 0.006 : (Math.random() - 0.4) * 0.003;
+  for (let i = 0; i < N; i++) {
+    walk.push(p);
+    p = p * (1 + trend + (Math.random() - 0.5) * (isMeme ? 0.04 : 0.015));
+  }
+  // Force last point to current price
+  const factor = price / walk[walk.length - 1];
+  for (let i = 0; i < walk.length; i++) walk[i] *= factor;
+
+  const minP = Math.min(...walk);
+  const maxP = Math.max(...walk);
+  const range = maxP - minP || 1;
+
+  function px(i) { return padL + (i / (N - 1)) * chartW; }
+  function py(v) { return padT + chartH - ((v - minP) / range) * chartH; }
+
+  // Grid
+  let gridHTML = '';
+  for (let i = 0; i <= 4; i++) {
+    const y = padT + (i / 4) * chartH;
+    const v = maxP - (i / 4) * range;
+    gridHTML += `<line class="grid-line" x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}"/>`;
+    gridHTML += `<text class="price-label" x="${W - padR + 4}" y="${y + 3}">${isMeme ? v.toFixed(4) : (v/1000).toFixed(1)+'k'}</text>`;
+  }
+  document.getElementById('chart-grid').innerHTML = gridHTML;
+
+  // Line path
+  const linePts = walk.map((v, i) => `${i === 0 ? 'M' : 'L'}${px(i)},${py(v)}`).join(' ');
+  document.getElementById('chart-line-path').setAttribute('d', linePts);
+
+  // Area path
+  const areaPath = linePts + ` L${px(N-1)},${padT + chartH} L${padL},${padT + chartH} Z`;
+  document.getElementById('chart-area-path').setAttribute('d', areaPath);
+
+  // Candles (show every 8th point for coarser candles)
+  const isUp = walk[walk.length - 1] > walk[0];
+  let candleHTML = '';
+  const step = Math.max(1, Math.floor(N / 30));
+  for (let i = 0; i < N - step; i += step) {
+    const slice = walk.slice(i, i + step);
+    const o = slice[0], c = slice[slice.length - 1];
+    const h = Math.max(...slice), l = Math.min(...slice);
+    const xc = px(i + step / 2);
+    const candleUp = c >= o;
+    const cls = candleUp ? 'candle-up' : 'candle-dn';
+    const wCls = candleUp ? 'wick-up' : 'wick-dn';
+    const cTop = py(Math.max(o, c)), cBot = py(Math.min(o, c));
+    const cH = Math.max(cBot - cTop, 1);
+    const cW = Math.max((chartW / (N / step)) * 0.6, 2);
+    candleHTML += `<line class="${wCls}" x1="${xc}" y1="${py(h)}" x2="${xc}" y2="${py(l)}"/>`;
+    candleHTML += `<rect class="${cls}" x="${xc - cW/2}" y="${cTop}" width="${cW}" height="${cH}" opacity="0.7"/>`;
+  }
+  document.getElementById('chart-candles').innerHTML = candleHTML;
+
+  // Color the line based on direction
+  const lineEl = document.getElementById('chart-line-path');
+  lineEl.style.stroke = isUp ? 'var(--green)' : 'var(--red)';
+
+  // Color area
+  const stop0 = document.querySelector('#areaGrad stop:first-child');
+  const stop1 = document.querySelector('#areaGrad stop:last-child');
+  const col = isUp ? '#00ff88' : '#ff4444';
+  stop0.setAttribute('stop-color', col);
+  stop1.setAttribute('stop-color', col);
+}
+
+// ─────────────────────────────────────────────
+//  ORDER PANEL
+// ─────────────────────────────────────────────
+function updateOrderPanel() {
+  const sym = document.getElementById('order-stock').value;
+  const qty = Math.max(1, parseInt(document.getElementById('order-qty').value) || 1);
+  const price = prices[sym];
+  const cost = price * qty;
+  const isMeme = STOCKS[sym].isMeme;
+  document.getElementById('est-cost-val').textContent = isMeme
+    ? '₹' + (cost).toFixed(4)
+    : fmtInr(cost);
+  drawChart();
+}
+
+// ─────────────────────────────────────────────
+//  P&L DISPLAY
+// ─────────────────────────────────────────────
+function calcPnl() {
+  let investedVal = 0;
+  let currentVal = 0;
+  for (const sym in state.holdings) {
+    const h = state.holdings[sym];
+    investedVal += h.qty * h.avgPrice;
+    currentVal += h.qty * prices[sym];
+  }
+  return { investedVal, currentVal, pnl: currentVal - investedVal };
+}
+
+function renderPnL() {
+  const { pnl } = calcPnl();
+  const pct = INITIAL_BALANCE > 0 ? (pnl / INITIAL_BALANCE) * 100 : 0;
+  const el = document.getElementById('pnl-display');
+  const sign = pnl >= 0 ? '+' : '';
+  el.textContent = `${sign}${fmtInr(pnl)} (${sign}${pct.toFixed(2)}%)`;
+
+  const wasGreen = el.classList.contains('green');
+  const nowGreen = pnl >= 0;
+
+  el.className = 'stat-value ' + (nowGreen ? 'green' : 'red');
+
+  // flash
+  el.classList.remove('flash-green', 'flash-red');
+  void el.offsetWidth;
+  el.classList.add(nowGreen ? 'flash-green' : 'flash-red');
+
+  // balance
+  document.getElementById('balance-display').textContent = fmtInr(state.balance);
+}
+
+// ─────────────────────────────────────────────
+//  HOLDINGS
+// ─────────────────────────────────────────────
+function renderHoldings() {
+  const syms = Object.keys(state.holdings);
+  const countEl = document.getElementById('holdings-count');
+  countEl.textContent = syms.length + (syms.length === 1 ? ' position' : ' positions');
+
+  if (syms.length === 0) {
+    document.getElementById('holdings-body').innerHTML = '<div class="no-holdings">No positions yet. Buy something!</div>';
+    return;
+  }
+
+  let { pnl: totalPnl } = calcPnl();
+  let totalPnlSign = totalPnl >= 0 ? '+' : '';
+
+  let rows = '';
+  for (const sym of syms) {
+    const h = state.holdings[sym];
+    const cur = prices[sym];
+    const pnl = (cur - h.avgPrice) * h.qty;
+    const pct = ((cur - h.avgPrice) / h.avgPrice) * 100;
+    const isMeme = STOCKS[sym].isMeme;
+    const pnlCls = pnl >= 0 ? 'pos' : 'neg';
+    const sign = pnl >= 0 ? '+' : '';
+    rows += `<tr>
+      <td><span class="holding-sym${isMeme ? ' meme' : ''}">${sym}</span></td>
+      <td>${h.qty}</td>
+      <td>${isMeme ? '₹'+h.avgPrice.toFixed(4) : fmtInr(h.avgPrice)}</td>
+      <td>${isMeme ? '₹'+cur.toFixed(4) : fmtInr(cur)}</td>
+      <td class="holding-pnl ${pnlCls}">${sign}${fmtInr(pnl)}<br><span style="font-size:10px">${sign}${pct.toFixed(1)}%</span></td>
+      <td><button class="btn-sell-sm" onclick="quickSell('${sym}')">SELL</button></td>
+    </tr>`;
+  }
+
+  const totalCls = totalPnl >= 0 ? 'color:var(--green)' : 'color:var(--red)';
+
+  document.getElementById('holdings-body').innerHTML = `
+    <table class="holdings-table">
+      <thead>
+        <tr>
+          <th>Symbol</th><th>Qty</th><th>Avg</th><th>LTP</th><th>P&amp;L</th><th></th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div class="holdings-total">
+      <span>Overall P&amp;L</span>
+      <span style="${totalCls}">${totalPnlSign}${fmtInr(totalPnl)}</span>
+    </div>`;
+}
+
+// ─────────────────────────────────────────────
+//  ORDER FLOW
+// ─────────────────────────────────────────────
+let pendingOrder = null;
+
+function placeOrder(side) {
+  const sym = document.getElementById('order-stock').value;
+  const qty = Math.max(1, parseInt(document.getElementById('order-qty').value) || 1);
+  const price = prices[sym];
+  const cost = price * qty;
+  const isMeme = STOCKS[sym].isMeme;
+
+  if (side === 'BUY') {
+    if (cost > state.balance) {
+      toast('Insufficient balance!', 'error');
+      return;
+    }
+  } else {
+    // SELL
+    const holding = state.holdings[sym];
+    if (!holding || holding.qty < qty) {
+      toast(`Not enough ${sym} to sell`, 'error');
+      return;
+    }
+  }
+
+  const priceStr = isMeme ? '₹' + price.toFixed(4) : fmtInr(price);
+  const costStr = isMeme ? '₹' + cost.toFixed(4) : fmtInr(cost);
+
+  pendingOrder = { sym, qty, price, cost, side, isMeme };
+
+  document.getElementById('modal-details').innerHTML = `
+    <span class="highlight">${side}</span> ${qty} share${qty > 1 ? 's' : ''} of <span class="highlight">${sym}</span><br>
+    @ ${priceStr}<br>
+    Total: <span class="highlight">${costStr}</span>
+  `;
+  document.getElementById('modal-overlay').classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('active');
+  pendingOrder = null;
+}
+
+function confirmOrder() {
+  closeModal();
+  if (!pendingOrder) return;
+  const { sym, qty, price, cost, side, isMeme } = pendingOrder;
+
+  if (side === 'BUY') {
+    state.balance -= cost;
+    if (!state.holdings[sym]) {
+      state.holdings[sym] = { qty: 0, avgPrice: 0 };
+    }
+    const h = state.holdings[sym];
+    const totalCost = h.qty * h.avgPrice + qty * price;
+    h.qty += qty;
+    h.avgPrice = totalCost / h.qty;
+    saveState();
+    toast(`Bought ${qty} × ${sym} @ ${isMeme ? '₹'+price.toFixed(4) : fmtInr(price)}`, 'success');
+  } else {
+    const h = state.holdings[sym];
+    const proceeds = qty * price;
+    state.balance += proceeds;
+    h.qty -= qty;
+    if (h.qty <= 0) delete state.holdings[sym];
+    saveState();
+    const pnl = (price - h?.avgPrice) * qty;
+    const sign = pnl >= 0 ? '+' : '';
+    toast(`Sold ${qty} × ${sym} | P&L: ${sign}${fmtInr(pnl)}`, pnl >= 0 ? 'success' : 'error');
+  }
+
+  renderHoldings();
+  renderPnL();
+  pendingOrder = null;
+}
+
+function quickSell(sym) {
+  const h = state.holdings[sym];
+  if (!h) return;
+  document.getElementById('order-stock').value = sym;
+  document.getElementById('order-qty').value = h.qty;
+  placeOrder('SELL');
+}
+
+// ─────────────────────────────────────────────
+//  MEME COIN MANIA
+// ─────────────────────────────────────────────
+let memeRekting = false;
+
+function goAllIn() {
+  const sym = 'MOONMEME';
+  const price = prices[sym];
+  const avail = Math.floor(state.balance / price);
+  if (avail < 1) {
+    toast('Not enough balance!', 'error');
+    return;
+  }
+
+  // Buy everything
+  const qty = avail;
+  const cost = qty * price;
+  state.balance -= cost;
+  if (!state.holdings[sym]) state.holdings[sym] = { qty: 0, avgPrice: 0 };
+  const h = state.holdings[sym];
+  const totalCost = h.qty * h.avgPrice + qty * price;
+  h.qty += qty;
+  h.avgPrice = totalCost / h.qty;
+  saveState();
+
+  toast(`WAGMI! Bought ${qty.toLocaleString()} MOONMEME! 🚀`, 'info');
+
+  // PUMP for 2 seconds
+  memeRekting = true;
+  let pumpInterval = setInterval(() => {
+    prices['MOONMEME'] *= 1.08;
+    baseChg['MOONMEME'] = ((prices['MOONMEME'] - STOCKS['MOONMEME'].base) / STOCKS['MOONMEME'].base) * 100;
+    renderTicker();
+    renderHoldings();
+    renderPnL();
+  }, 200);
+
+  // Then DUMP
+  setTimeout(() => {
+    clearInterval(pumpInterval);
+    // CRASH -99%
+    const crashPrice = prices['MOONMEME'] * 0.01;
+    prices['MOONMEME'] = crashPrice;
+    baseChg['MOONMEME'] = -99.0;
+
+    // Calculate losses
+    const currentHolding = state.holdings['MOONMEME'];
+    if (currentHolding) {
+      const lossAmt = (currentHolding.avgPrice - crashPrice) * currentHolding.qty;
+      // Force sell at crash price
+      state.balance += currentHolding.qty * crashPrice;
+      delete state.holdings['MOONMEME'];
+      saveState();
+
+      renderTicker();
+      renderHoldings();
+      renderPnL();
+
+      // Show REKT
+      document.getElementById('rekt-amount').textContent =
+        '-' + fmtInr(Math.abs(lossAmt));
+      document.getElementById('rekt-overlay').classList.add('active');
+    }
+    memeRekting = false;
+  }, 2500);
+}
+
+function closeRekt() {
+  document.getElementById('rekt-overlay').classList.remove('active');
+  // Reset meme coin price
+  prices['MOONMEME'] = STOCKS['MOONMEME'].base;
+  baseChg['MOONMEME'] = 847.3;
+  renderTicker();
+}
+
+// ─────────────────────────────────────────────
+//  RESET
+// ─────────────────────────────────────────────
+function resetPortfolio() {
+  if (!confirm('Reset everything and start fresh with ₹1,00,000?')) return;
+  state = defaultState();
+  saveState();
+  prices['MOONMEME'] = STOCKS['MOONMEME'].base;
+  baseChg['MOONMEME'] = 847.3;
+  memeRekting = false;
+  document.getElementById('rekt-overlay').classList.remove('active');
+  renderHoldings();
+  renderPnL();
+  renderTicker();
+  toast('Portfolio reset! Good luck this time.', 'info');
+}
+
+// ─────────────────────────────────────────────
+//  TOAST
+// ─────────────────────────────────────────────
+function toast(msg, type = 'info') {
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(() => el.remove(), 3100);
+}
+
+// ─────────────────────────────────────────────
+//  STARS for meme panel
+// ─────────────────────────────────────────────
+function buildStars() {
+  const c = document.getElementById('stars-container');
+  for (let i = 0; i < 18; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    s.style.left = Math.random() * 100 + '%';
+    s.style.top = Math.random() * 100 + '%';
+    s.style.animationDelay = Math.random() * 2 + 's';
+    s.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+    c.appendChild(s);
+  }
+}
+
+// ─────────────────────────────────────────────
+//  INIT
+// ─────────────────────────────────────────────
+buildStars();
+drawChart();
+renderHoldings();
+renderPnL();
+renderTicker();
+updateOrderPanel();
+
+// Price ticks every 2.2 seconds
+setInterval(tickPrices, 2200);
+
+// Redraw chart every 10 seconds
+setInterval(() => {
+  if (!memeRekting) drawChart();
+}, 10000);
+
+// Periodic P&L refresh
+setInterval(renderPnL, 1000);
+
+// Keep ticker scroll alive by resetting if it stops
+// (not needed but chart redraw on stock change is nice)
+document.getElementById('order-stock').addEventListener('change', () => {
+  updateOrderPanel();
+});
+</script>
+</body>
+</html>

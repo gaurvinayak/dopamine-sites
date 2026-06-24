@@ -1,0 +1,1608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IRCTC Tatkal Booking - Indian Railway Catering and Tourism Corporation</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13px;
+    background: #e8e8e8;
+    color: #333;
+    min-height: 100vh;
+  }
+
+  .irctc-header {
+    background: #800000;
+    color: white;
+    padding: 0;
+    border-bottom: 3px solid #5a0000;
+  }
+
+  .irctc-header-top {
+    background: #800000;
+    padding: 6px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .irctc-logo {
+    font-size: 22px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    color: #fff;
+    text-shadow: 1px 1px 2px #000;
+  }
+
+  .irctc-logo span {
+    color: #ffd700;
+  }
+
+  .irctc-tagline {
+    font-size: 10px;
+    color: #ffcccc;
+  }
+
+  .irctc-nav {
+    background: #1a56db;
+    padding: 4px 10px;
+    font-size: 11px;
+    color: #fff;
+    display: flex;
+    gap: 16px;
+  }
+
+  .irctc-nav a {
+    color: #fff;
+    text-decoration: none;
+    cursor: default;
+  }
+
+  .irctc-nav a:hover {
+    text-decoration: underline;
+  }
+
+  .main-container {
+    max-width: 480px;
+    margin: 12px auto;
+    padding: 0 8px 40px;
+  }
+
+  .screen {
+    display: none;
+  }
+
+  .screen.active {
+    display: block;
+  }
+
+  /* ===================== WAITING ROOM ===================== */
+  .waiting-box {
+    background: white;
+    border: 1px solid #ccc;
+    border-top: 3px solid #800000;
+    padding: 16px;
+    margin-bottom: 10px;
+  }
+
+  .waiting-box h2 {
+    color: #800000;
+    font-size: 15px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 6px;
+  }
+
+  .live-clock {
+    font-size: 28px;
+    font-family: monospace;
+    color: #1a56db;
+    text-align: center;
+    padding: 6px 0;
+    background: #f0f4ff;
+    border: 1px solid #c8d8ff;
+    margin: 8px 0;
+    letter-spacing: 2px;
+  }
+
+  .countdown-label {
+    font-size: 11px;
+    color: #666;
+    text-align: center;
+    margin-bottom: 4px;
+  }
+
+  .countdown-display {
+    font-size: 40px;
+    font-family: monospace;
+    text-align: center;
+    color: #c00;
+    letter-spacing: 4px;
+    background: #fff8f8;
+    border: 2px solid #c00;
+    padding: 10px;
+    margin: 10px 0;
+    animation: pulse 1s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.85; }
+  }
+
+  .tagline {
+    text-align: center;
+    font-size: 12px;
+    color: #800000;
+    font-style: italic;
+    margin: 6px 0;
+    font-weight: bold;
+  }
+
+  .user-counter {
+    background: #fffbe6;
+    border: 1px solid #e6d200;
+    padding: 8px;
+    text-align: center;
+    font-size: 12px;
+    margin: 8px 0;
+  }
+
+  .user-counter strong {
+    font-size: 18px;
+    color: #b35900;
+    font-family: monospace;
+  }
+
+  .btn-primary {
+    display: block;
+    width: 100%;
+    background: #1a56db;
+    color: white;
+    border: none;
+    padding: 11px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+    letter-spacing: 0.5px;
+  }
+
+  .btn-primary:hover {
+    background: #1246c0;
+  }
+
+  .btn-primary:active {
+    background: #0e3699;
+  }
+
+  .btn-maroon {
+    display: block;
+    width: 100%;
+    background: #800000;
+    color: white;
+    border: none;
+    padding: 10px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 8px;
+    letter-spacing: 0.5px;
+  }
+
+  .btn-maroon:hover { background: #6a0000; }
+
+  .info-note {
+    font-size: 10px;
+    color: #888;
+    text-align: center;
+    margin-top: 6px;
+  }
+
+  /* ===================== PANIC CLOCK ===================== */
+  .panic-clock-bar {
+    background: #800000;
+    color: #fff;
+    padding: 4px 10px;
+    font-size: 11px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: monospace;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .panic-time {
+    font-size: 15px;
+    color: #ffff88;
+    letter-spacing: 2px;
+  }
+
+  /* ===================== SEARCH FORM ===================== */
+  .form-box {
+    background: white;
+    border: 1px solid #ccc;
+    border-top: 3px solid #800000;
+    padding: 14px;
+    margin-bottom: 10px;
+  }
+
+  .form-box h3 {
+    color: #800000;
+    font-size: 14px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 5px;
+  }
+
+  .form-row {
+    margin-bottom: 8px;
+  }
+
+  .form-row label {
+    display: block;
+    font-size: 11px;
+    color: #555;
+    margin-bottom: 3px;
+    font-weight: bold;
+  }
+
+  .form-row input,
+  .form-row select {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid #aaa;
+    font-size: 13px;
+    font-family: Arial, sans-serif;
+    background: #fefefe;
+  }
+
+  .form-row input:focus,
+  .form-row select:focus {
+    outline: 2px solid #1a56db;
+    border-color: #1a56db;
+  }
+
+  .form-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  /* ===================== TRAIN LIST ===================== */
+  .train-card {
+    background: white;
+    border: 1px solid #ccc;
+    margin-bottom: 8px;
+    border-left: 4px solid #1a56db;
+  }
+
+  .train-card-header {
+    background: #f4f4f4;
+    padding: 7px 10px;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .train-name {
+    font-weight: bold;
+    font-size: 13px;
+    color: #1a56db;
+  }
+
+  .train-number {
+    font-size: 11px;
+    color: #666;
+    font-family: monospace;
+  }
+
+  .train-timings {
+    padding: 7px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px dashed #ddd;
+  }
+
+  .time-label {
+    font-size: 10px;
+    color: #999;
+  }
+
+  .time-val {
+    font-size: 16px;
+    font-family: monospace;
+    font-weight: bold;
+  }
+
+  .duration {
+    font-size: 11px;
+    color: #666;
+    text-align: center;
+  }
+
+  .seat-info {
+    padding: 7px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .seat-avail {
+    font-family: monospace;
+    font-size: 12px;
+  }
+
+  .avail-zero { color: #c00; font-weight: bold; }
+  .avail-rac { color: #e65c00; font-weight: bold; }
+  .avail-wl { color: #c00; font-weight: bold; }
+
+  .seat-update-note {
+    font-size: 10px;
+    color: #888;
+    text-align: right;
+    padding: 2px 10px 6px;
+  }
+
+  .btn-book {
+    margin: 0 10px 8px;
+    background: #1a56db;
+    color: white;
+    border: none;
+    padding: 7px 16px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    float: right;
+  }
+
+  .btn-book:hover { background: #1246c0; }
+
+  .clearfix::after {
+    content: '';
+    display: block;
+    clear: both;
+  }
+
+  /* ===================== CAPTCHA ===================== */
+  .captcha-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .captcha-box {
+    background: white;
+    border: 2px solid #800000;
+    padding: 20px;
+    width: 320px;
+    text-align: center;
+  }
+
+  .captcha-box h4 {
+    color: #800000;
+    margin-bottom: 12px;
+    font-size: 14px;
+  }
+
+  .captcha-image {
+    background: #f0f0f0;
+    border: 1px solid #ccc;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: monospace;
+    font-size: 28px;
+    letter-spacing: 10px;
+    color: #333;
+    text-decoration: line-through;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 10px;
+    user-select: none;
+    font-weight: bold;
+    filter: blur(0.5px);
+    background-image: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 5px,
+      rgba(180,180,180,0.2) 5px,
+      rgba(180,180,180,0.2) 10px
+    );
+  }
+
+  .captcha-image::before {
+    content: '';
+    position: absolute;
+    top: 20px; left: 0; right: 0;
+    height: 1px;
+    background: #800000;
+    transform: rotate(-3deg);
+  }
+
+  .captcha-input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #aaa;
+    font-size: 16px;
+    text-align: center;
+    font-family: monospace;
+    letter-spacing: 4px;
+    margin-bottom: 8px;
+  }
+
+  .captcha-error {
+    color: #c00;
+    font-size: 12px;
+    font-weight: bold;
+    margin-bottom: 6px;
+    display: none;
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    15% { transform: translateX(-8px); }
+    30% { transform: translateX(8px); }
+    45% { transform: translateX(-6px); }
+    60% { transform: translateX(6px); }
+    75% { transform: translateX(-4px); }
+    90% { transform: translateX(4px); }
+  }
+
+  .shake { animation: shake 0.5s ease; }
+
+  /* ===================== PASSENGER FORM ===================== */
+  .red-banner {
+    background: #c00;
+    color: white;
+    padding: 7px 10px;
+    font-size: 12px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 8px;
+    animation: blinkbanner 0.8s infinite;
+  }
+
+  @keyframes blinkbanner {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+
+  .yellow-note {
+    background: #fffbe6;
+    border: 1px solid #f0c000;
+    padding: 6px 10px;
+    font-size: 11px;
+    color: #665500;
+    margin-bottom: 8px;
+  }
+
+  .fare-box {
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    padding: 8px 10px;
+    margin: 8px 0;
+    font-size: 12px;
+  }
+
+  .fare-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 2px 0;
+  }
+
+  .fare-row.total {
+    font-weight: bold;
+    border-top: 1px solid #ddd;
+    margin-top: 4px;
+    padding-top: 5px;
+    font-size: 14px;
+    color: #800000;
+  }
+
+  .btn-pay {
+    display: block;
+    width: 100%;
+    background: #c00;
+    color: white;
+    border: none;
+    padding: 12px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+    letter-spacing: 0.5px;
+  }
+
+  .btn-pay:hover { background: #a00; }
+
+  /* ===================== PAYMENT SCREEN ===================== */
+  .payment-option {
+    background: white;
+    border: 1px solid #ccc;
+    padding: 12px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .payment-option:hover {
+    border-color: #1a56db;
+    background: #f0f4ff;
+  }
+
+  .payment-option.selected {
+    border-color: #1a56db;
+    background: #e8efff;
+  }
+
+  .payment-option input[type="radio"] {
+    width: auto;
+  }
+
+  .payment-label {
+    font-size: 13px;
+    font-weight: bold;
+  }
+
+  .payment-sublabel {
+    font-size: 10px;
+    color: #888;
+  }
+
+  .spinner-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(255,255,255,0.92);
+    z-index: 300;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+  }
+
+  .spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #ddd;
+    border-top-color: #1a56db;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .spinner-text {
+    font-size: 14px;
+    color: #555;
+    text-align: center;
+  }
+
+  /* ===================== FAILURE SCREEN ===================== */
+  @keyframes screenShake {
+    0%, 100% { transform: translateX(0) translateY(0); }
+    10% { transform: translateX(-10px) translateY(-3px); }
+    20% { transform: translateX(10px) translateY(3px); }
+    30% { transform: translateX(-8px) translateY(-2px); }
+    40% { transform: translateX(8px) translateY(2px); }
+    50% { transform: translateX(-6px) translateY(-1px); }
+    60% { transform: translateX(6px) translateY(1px); }
+    70% { transform: translateX(-4px) translateY(0); }
+    80% { transform: translateX(4px) translateY(0); }
+    90% { transform: translateX(-2px) translateY(0); }
+  }
+
+  .screen-shake {
+    animation: screenShake 0.6s ease;
+  }
+
+  .failure-box {
+    background: white;
+    border: 3px solid #c00;
+    padding: 20px;
+    text-align: center;
+  }
+
+  .failure-title {
+    font-size: 36px;
+    font-weight: bold;
+    color: #c00;
+    font-family: monospace;
+    letter-spacing: 3px;
+    margin-bottom: 6px;
+    text-shadow: 2px 2px 0 #800;
+  }
+
+  .failure-code {
+    font-size: 12px;
+    color: #888;
+    font-family: monospace;
+    margin-bottom: 14px;
+  }
+
+  .failure-reason {
+    font-size: 16px;
+    color: #800000;
+    font-weight: bold;
+    background: #fff0f0;
+    border: 1px solid #f0c0c0;
+    padding: 10px;
+    margin: 10px 0;
+  }
+
+  .failure-wl {
+    font-size: 13px;
+    color: #555;
+    font-family: monospace;
+    margin: 12px 0;
+    background: #f8f8f8;
+    border: 1px dashed #ccc;
+    padding: 8px;
+  }
+
+  .leaderboard {
+    background: #1a1a2e;
+    color: #0f0;
+    padding: 12px;
+    font-family: monospace;
+    font-size: 12px;
+    margin: 12px 0;
+    border: 2px solid #0f0;
+    text-align: left;
+  }
+
+  .leaderboard-title {
+    color: #ffd700;
+    font-size: 13px;
+    margin-bottom: 8px;
+    text-align: center;
+  }
+
+  .leaderboard-row {
+    padding: 3px 0;
+    border-bottom: 1px solid #1a3a1a;
+  }
+
+  .leaderboard-row:last-child {
+    border-bottom: none;
+  }
+
+  .lb-you {
+    color: #ff6600;
+    font-weight: bold;
+  }
+
+  .failure-time {
+    font-size: 20px;
+    color: #c00;
+    font-family: monospace;
+    font-weight: bold;
+  }
+
+  .btn-retry {
+    display: block;
+    width: 100%;
+    background: #800000;
+    color: white;
+    border: none;
+    padding: 11px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+
+  .btn-retry:hover { background: #600000; }
+
+  .btn-share {
+    display: block;
+    width: 100%;
+    background: #1a56db;
+    color: white;
+    border: none;
+    padding: 10px;
+    font-size: 13px;
+    cursor: pointer;
+    margin-top: 6px;
+  }
+
+  .btn-share:hover { background: #1246c0; }
+
+  /* ===================== SESSION TIMEOUT POPUP ===================== */
+  .timeout-popup {
+    position: fixed;
+    top: 60px;
+    right: 8px;
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    border-left: 4px solid #c00;
+    padding: 8px 12px;
+    font-size: 11px;
+    color: #333;
+    z-index: 150;
+    max-width: 220px;
+    box-shadow: 2px 2px 6px rgba(0,0,0,0.2);
+    display: none;
+  }
+
+  .timeout-popup strong {
+    color: #c00;
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  /* ===================== MISC ===================== */
+  .section-note {
+    font-size: 10px;
+    color: #888;
+    text-align: center;
+    margin-top: 4px;
+  }
+
+  .irctc-footer {
+    text-align: center;
+    font-size: 9px;
+    color: #aaa;
+    padding: 10px;
+    margin-top: 10px;
+  }
+
+  .status-bar {
+    background: #f4f4f4;
+    border: 1px solid #ddd;
+    padding: 4px 8px;
+    font-size: 10px;
+    color: #666;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .captcha-refresh {
+    font-size: 11px;
+    color: #1a56db;
+    cursor: pointer;
+    text-decoration: underline;
+    display: block;
+    margin-bottom: 8px;
+  }
+</style>
+</head>
+<body>
+
+<!-- IRCTC HEADER -->
+<div class="irctc-header">
+  <div class="irctc-header-top">
+    <div>
+      <div class="irctc-logo">IRCTC <span>e-Ticketing</span></div>
+      <div class="irctc-tagline">Indian Railway Catering and Tourism Corporation Ltd.</div>
+    </div>
+    <div style="font-size:10px; color:#ffaaaa; text-align:right;">
+      Login | Register<br>
+      <span style="color:#ffff88;">Logged in: rahul_k_28</span>
+    </div>
+  </div>
+  <div class="irctc-nav">
+    <a href="#">Home</a>
+    <a href="#">Book Ticket</a>
+    <a href="#">PNR Status</a>
+    <a href="#">My Bookings</a>
+    <a href="#">Cancel</a>
+  </div>
+</div>
+
+<!-- PANIC CLOCK BAR (hidden initially) -->
+<div class="panic-clock-bar" id="panicBar" style="display:none;">
+  <span>Tatkal Queue Open — Time Elapsed:</span>
+  <span class="panic-time" id="panicTime">00:00:00</span>
+  <span style="font-size:10px; color:#ffaaaa;">Every second costs you a seat</span>
+</div>
+
+<!-- SESSION TIMEOUT POPUP -->
+<div class="timeout-popup" id="timeoutPopup">
+  <strong>⚠ Session Warning</strong>
+  Your session will expire in <span id="sessionCountdown">5:00</span>. Please complete booking.
+</div>
+
+<!-- CAPTCHA OVERLAY -->
+<div class="captcha-overlay" id="captchaOverlay" style="display:none;">
+  <div class="captcha-box">
+    <h4>Security Verification Required</h4>
+    <p style="font-size:11px; color:#666; margin-bottom:10px;">Enter the characters shown in the image below</p>
+    <div class="captcha-image" id="captchaImg">
+      <span id="captchaText">R7K2M9</span>
+    </div>
+    <span class="captcha-refresh" onclick="refreshCaptcha()">&#x21bb; Can't read? Refresh captcha</span>
+    <div class="captcha-error" id="captchaError">Invalid captcha. Please try again.</div>
+    <input type="text" class="captcha-input" id="captchaInput" maxlength="6" placeholder="Enter 6 characters" autocomplete="off">
+    <button class="btn-primary" onclick="submitCaptcha()" style="margin-top:4px;">Verify &amp; Continue</button>
+    <p style="font-size:10px; color:#888; margin-top:8px;">Case sensitive. Do not copy-paste.</p>
+  </div>
+</div>
+
+<!-- PAYMENT SPINNER -->
+<div class="spinner-overlay" id="spinnerOverlay" style="display:none;">
+  <div class="spinner"></div>
+  <div class="spinner-text" id="spinnerText">
+    Connecting to payment gateway...<br>
+    <span style="font-size:11px; color:#888;">Please do not press Back or Refresh</span>
+  </div>
+</div>
+
+<div class="main-container" id="mainContainer">
+
+  <!-- ==================== SCREEN 1: WAITING ROOM ==================== -->
+  <div class="screen active" id="screen-waiting">
+    <div class="waiting-box">
+      <h2>Tatkal Ticket Booking</h2>
+      <div class="countdown-label">Current Time (IST)</div>
+      <div class="live-clock" id="liveClock">--:--:--</div>
+      <div class="countdown-label" style="margin-top:10px;">Tatkal Opens In:</div>
+      <div class="countdown-display" id="countdownDisplay">00:03:00</div>
+      <div class="tagline">"10:00 AM. The annual hunger games begins."</div>
+      <div class="user-counter">
+        <div style="font-size:11px; color:#666; margin-bottom:2px;">Currently in queue</div>
+        <strong id="userCount">1,547</strong>
+        <div style="font-size:11px; color:#888; margin-top:2px;">people waiting to book the same train</div>
+      </div>
+      <button class="btn-primary" id="startBtn" onclick="startCountdown()">I'm Ready to Suffer</button>
+      <div class="info-note">Tatkal booking opens at 10:00 AM daily. God bless you.</div>
+    </div>
+
+    <div style="background:white; border:1px solid #ccc; padding:10px; font-size:11px; color:#555;">
+      <strong style="color:#800000;">Important:</strong> Tatkal quota opens at 10:00 AM for AC classes and 11:00 AM for Sleeper.
+      Seats fill within seconds. IRCTC is not responsible for any cardiac events during booking.
+      <br><br>
+      <span style="color:#c00;">&#9888; High traffic expected. Server response may be slow.</span>
+    </div>
+  </div>
+
+  <!-- ==================== SCREEN 2: TRAIN SEARCH ==================== -->
+  <div class="screen" id="screen-search">
+    <div class="status-bar">
+      <span>Book Ticket &gt; Search Train</span>
+      <span id="searchSessionTimer" style="color:#c00; font-size:10px;">Session: 29:55</span>
+    </div>
+    <div class="form-box">
+      <h3>Search Trains</h3>
+      <div class="form-row">
+        <label>From Station *</label>
+        <input type="text" id="fromStation" value="NEW DELHI (NDLS)">
+      </div>
+      <div class="form-row">
+        <label>To Station *</label>
+        <input type="text" id="toStation" value="MUMBAI CENTRAL (BCT)">
+      </div>
+      <div class="form-grid-2">
+        <div class="form-row">
+          <label>Date of Journey *</label>
+          <input type="text" id="journeyDate" readonly>
+        </div>
+        <div class="form-row">
+          <label>Class *</label>
+          <select id="trainClass">
+            <option value="3A">3A - AC 3 Tier</option>
+            <option value="2A">2A - AC 2 Tier</option>
+            <option value="SL">SL - Sleeper</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <label>Quota *</label>
+        <select>
+          <option>TATKAL</option>
+        </select>
+      </div>
+      <button class="btn-primary" onclick="searchTrains()">Search Trains</button>
+      <div class="info-note">Showing Tatkal availability only</div>
+    </div>
+  </div>
+
+  <!-- ==================== SCREEN 3: TRAIN LIST ==================== -->
+  <div class="screen" id="screen-trains">
+    <div class="status-bar">
+      <span>Search Results</span>
+      <span id="trainsSessionNote" style="color:#c00; font-size:10px;">Session: 29:32</span>
+    </div>
+    <div style="background:#e8f0fe; border:1px solid #c5d7f5; padding:7px 10px; margin-bottom:8px; font-size:11px; color:#1a56db;">
+      Showing trains from <strong>NEW DELHI</strong> to <strong>MUMBAI CENTRAL</strong> | Tatkal | <span id="resultDate"></span>
+    </div>
+    <div style="font-size:10px; color:#888; margin-bottom:6px; text-align:right;">
+      <span id="seatUpdateNotice">Seat count updating every 30s &#x21bb;</span>
+    </div>
+
+    <!-- Train 1 -->
+    <div class="train-card" id="trainCard1">
+      <div class="train-card-header">
+        <div>
+          <div class="train-name">12951 - Mumbai Rajdhani</div>
+          <div class="train-number">Runs: Mon Tue Wed Thu Fri Sat Sun</div>
+        </div>
+        <div style="font-size:10px; color:#1a56db; text-align:right;">TATKAL<br><span style="color:#666;">Charging Extra</span></div>
+      </div>
+      <div class="train-timings">
+        <div>
+          <div class="time-label">Departs</div>
+          <div class="time-val">16:55</div>
+          <div style="font-size:10px; color:#888;">NDLS</div>
+        </div>
+        <div class="duration">
+          <div>&#8594;&#8594;&#8594;</div>
+          <div style="font-size:10px;">15h 35m</div>
+        </div>
+        <div>
+          <div class="time-label">Arrives</div>
+          <div class="time-val">08:35</div>
+          <div style="font-size:10px; color:#888;">BCT +1</div>
+        </div>
+      </div>
+      <div class="seat-info">
+        <div class="seat-avail">
+          <span class="avail-zero">AVAIL: 0</span> &nbsp;|&nbsp;
+          <span class="avail-rac">RAC <span class="t1-rac">3</span></span> &nbsp;|&nbsp;
+          <span class="avail-wl">WL <span class="t1-wl">47</span></span>
+        </div>
+        <button class="btn-book" onclick="bookTrain(0)">Book &gt;</button>
+      </div>
+      <div class="seat-update-note" id="seatNote1">Last updated: just now</div>
+      <div class="clearfix"></div>
+    </div>
+
+    <!-- Train 2 -->
+    <div class="train-card" id="trainCard2">
+      <div class="train-card-header">
+        <div>
+          <div class="train-name">12221 - Mumbai Duronto</div>
+          <div class="train-number">Runs: Mon Wed Fri</div>
+        </div>
+        <div style="font-size:10px; color:#1a56db; text-align:right;">TATKAL<br><span style="color:#666;">Charging Extra</span></div>
+      </div>
+      <div class="train-timings">
+        <div>
+          <div class="time-label">Departs</div>
+          <div class="time-val">22:30</div>
+          <div style="font-size:10px; color:#888;">NDLS</div>
+        </div>
+        <div class="duration">
+          <div>&#8594;&#8594;&#8594;</div>
+          <div style="font-size:10px;">17h 10m</div>
+        </div>
+        <div>
+          <div class="time-label">Arrives</div>
+          <div class="time-val">15:40</div>
+          <div style="font-size:10px; color:#888;">BCT +1</div>
+        </div>
+      </div>
+      <div class="seat-info">
+        <div class="seat-avail">
+          <span class="avail-zero">AVAIL: 0</span> &nbsp;|&nbsp;
+          <span class="avail-rac">RAC <span class="t2-rac">1</span></span> &nbsp;|&nbsp;
+          <span class="avail-wl">WL <span class="t2-wl">23</span></span>
+        </div>
+        <button class="btn-book" onclick="bookTrain(1)">Book &gt;</button>
+      </div>
+      <div class="seat-update-note" id="seatNote2">Last updated: just now</div>
+      <div class="clearfix"></div>
+    </div>
+
+    <!-- Train 3 -->
+    <div class="train-card" id="trainCard3">
+      <div class="train-card-header">
+        <div>
+          <div class="train-name">12009 - Mumbai Shatabdi</div>
+          <div class="train-number">Runs: Mon Tue Thu Fri Sun</div>
+        </div>
+        <div style="font-size:10px; color:#1a56db; text-align:right;">TATKAL<br><span style="color:#666;">Charging Extra</span></div>
+      </div>
+      <div class="train-timings">
+        <div>
+          <div class="time-label">Departs</div>
+          <div class="time-val">06:00</div>
+          <div style="font-size:10px; color:#888;">NDLS</div>
+        </div>
+        <div class="duration">
+          <div>&#8594;&#8594;&#8594;</div>
+          <div style="font-size:10px;">7h 35m</div>
+        </div>
+        <div>
+          <div class="time-label">Arrives</div>
+          <div class="time-val">13:35</div>
+          <div style="font-size:10px; color:#888;">BCT</div>
+        </div>
+      </div>
+      <div class="seat-info">
+        <div class="seat-avail">
+          <span class="avail-zero">AVAIL: 0</span> &nbsp;|&nbsp;
+          <span class="avail-rac">RAC <span class="t3-rac">0</span></span> &nbsp;|&nbsp;
+          <span class="avail-wl">WL <span class="t3-wl">89</span></span>
+        </div>
+        <button class="btn-book" onclick="bookTrain(2)">Book &gt;</button>
+      </div>
+      <div class="seat-update-note" id="seatNote3">Last updated: just now</div>
+      <div class="clearfix"></div>
+    </div>
+  </div>
+
+  <!-- ==================== SCREEN 4: PASSENGER FORM ==================== -->
+  <div class="screen" id="screen-passenger">
+    <div class="red-banner">&#9888; HURRY! Tatkal prices may change. Complete booking NOW.</div>
+    <div class="status-bar">
+      <span>Passenger Details</span>
+      <span id="passSessionNote" style="color:#c00; font-size:10px;">Session: 28:44</span>
+    </div>
+    <div class="yellow-note">
+      You are booking: <strong>12951 Mumbai Rajdhani</strong> | 3A | Tatkal | <span id="passengerDate"></span><br>
+      Quota: TATKAL | Seats may change. Fill details quickly.
+    </div>
+    <div class="form-box">
+      <h3>Passenger 1 Details</h3>
+      <div class="form-row">
+        <label>Name (as per ID) *</label>
+        <input type="text" id="passName" value="RAHUL KUMAR">
+      </div>
+      <div class="form-grid-2">
+        <div class="form-row">
+          <label>Age *</label>
+          <input type="number" id="passAge" value="28">
+        </div>
+        <div class="form-row">
+          <label>Gender *</label>
+          <select id="passGender">
+            <option>Male</option>
+            <option>Female</option>
+            <option>Transgender</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <label>ID Type *</label>
+        <select id="passIdType">
+          <option>Aadhaar Card</option>
+          <option>PAN Card</option>
+          <option>Voter ID</option>
+          <option>Passport</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>ID Number *</label>
+        <input type="text" id="passIdNum" placeholder="XXXX XXXX XXXX">
+      </div>
+      <div class="form-row">
+        <label>Mobile (for SMS alerts) *</label>
+        <input type="text" value="98XXXXXXXX">
+      </div>
+    </div>
+
+    <div class="form-box" style="margin-bottom:8px;">
+      <h3>Fare Summary</h3>
+      <div class="fare-box">
+        <div class="fare-row"><span>Base Fare (3A)</span><span>&#8377;1,895</span></div>
+        <div class="fare-row"><span>Tatkal Charges</span><span style="color:#c00;">&#8377;400</span></div>
+        <div class="fare-row"><span>Reservation Fee</span><span>&#8377;40</span></div>
+        <div class="fare-row"><span>GST</span><span>&#8377;10</span></div>
+        <div class="fare-row total"><span>Total Amount</span><span>&#8377;2,345</span></div>
+      </div>
+    </div>
+
+    <button class="btn-pay" onclick="proceedToPayment()">Pay Now &#8377;2,345 &rarr;</button>
+    <div class="section-note">By clicking Pay Now you agree to IRCTC terms. No refund on Tatkal tickets.</div>
+  </div>
+
+  <!-- ==================== SCREEN 5: PAYMENT ==================== -->
+  <div class="screen" id="screen-payment">
+    <div class="red-banner">&#9888; Payment must be completed in <span id="payCountdown">9:59</span></div>
+    <div class="status-bar">
+      <span>Payment Gateway</span>
+      <span style="color:#1a56db; font-size:10px;">Secured by IRCTC Pay</span>
+    </div>
+    <div class="form-box">
+      <h3>Select Payment Method</h3>
+      <div class="payment-option selected" onclick="selectPayment(this)">
+        <input type="radio" name="paymethod" checked>
+        <div>
+          <div class="payment-label">UPI / PhonePe / GPay / BHIM</div>
+          <div class="payment-sublabel">Pay directly from bank account. 0% extra charge.</div>
+        </div>
+      </div>
+      <div class="payment-option" onclick="selectPayment(this)">
+        <input type="radio" name="paymethod">
+        <div>
+          <div class="payment-label">Debit / Credit Card</div>
+          <div class="payment-sublabel">Visa, Mastercard, RuPay accepted</div>
+        </div>
+      </div>
+      <div class="payment-option" onclick="selectPayment(this)">
+        <input type="radio" name="paymethod">
+        <div>
+          <div class="payment-label">Net Banking</div>
+          <div class="payment-sublabel">SBI, HDFC, ICICI, Axis and 40+ banks</div>
+        </div>
+      </div>
+      <div style="margin-top:12px; background:#f8f8f8; border:1px solid #ddd; padding:8px 10px; font-size:12px;">
+        <div style="display:flex; justify-content:space-between;">
+          <span>Amount to Pay:</span>
+          <strong style="color:#800000;">&#8377;2,345</strong>
+        </div>
+        <div style="font-size:10px; color:#888; margin-top:3px;">Booking for: RAHUL KUMAR | 12951 Rajdhani | 3A</div>
+      </div>
+      <button class="btn-pay" onclick="initiatePayment()">Proceed to Pay &#8377;2,345</button>
+    </div>
+    <div class="irctc-footer">
+      This is a secure payment. Your card details are encrypted.<br>
+      IRCTC Payment Gateway — Powered by Axis Bank
+    </div>
+  </div>
+
+  <!-- ==================== SCREEN 6: FAILURE ==================== -->
+  <div class="screen" id="screen-failure">
+    <div class="failure-box" id="failureBox">
+      <div style="font-size:11px; color:#888; font-family:monospace; margin-bottom:8px;">
+        PNR: PENDING &nbsp;|&nbsp; TXN: <span id="failTxnId">FAILED</span>
+      </div>
+      <div class="failure-title">BOOKING FAILED</div>
+      <div class="failure-code">ERROR CODE: <span id="errorCode">ERR_504_GW_TIMEOUT</span></div>
+      <div class="failure-reason" id="failureReason">
+        Payment gateway timeout. Please try again.
+      </div>
+      <div class="failure-wl">
+        WL 47. Same as last year. Same as every year.<br>
+        <span style="font-size:10px; color:#999;">Current Position: WL/47 | Confirmation Probability: 2%</span>
+      </div>
+      <div style="margin:10px 0; font-size:13px; color:#555;">
+        You lasted:
+        <div class="failure-time" id="failureTimeDisplay">-- seconds</div>
+        in the Tatkal queue.
+      </div>
+
+      <div class="leaderboard">
+        <div class="leaderboard-title">&#127942; TATKAL SURVIVORS BOARD</div>
+        <div class="leaderboard-row">&#129351; Fastest failure today: <strong>23s</strong> &mdash; Manish, Jaipur</div>
+        <div class="leaderboard-row lb-you">&#128293; Your time: <strong id="lbYourTime">0s</strong></div>
+        <div class="leaderboard-row">&#128200; National average: <strong>47s</strong></div>
+        <div class="leaderboard-row" style="color:#888; font-size:10px;">&#128301; Server uptime during your session: 60%</div>
+      </div>
+
+      <div style="font-size:11px; color:#666; margin-bottom:10px; background:#fff8f8; border:1px solid #fcc; padding:8px;">
+        Your amount of &#8377;2,345 will be refunded to your account within <strong>5-7 business days</strong>.
+        <br><span style="color:#888; font-size:10px;">(Or never. Who knows.)</span>
+      </div>
+
+      <button class="btn-share" onclick="shareResult()">
+        &#128279; I survived <span id="shareTimeBtn">0s</span> of Tatkal booking. Send help.
+      </button>
+      <button class="btn-retry" onclick="resetApp()">Try Again (You Won't)</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="main-container" style="max-width:480px; margin:0 auto; padding:0 8px 20px;">
+  <div class="irctc-footer">
+    &copy; 2024 IRCTC Ltd. | CIN: U74899DL1999GOI101707<br>
+    Best viewed in Internet Explorer 8.0+ at 1024x768 resolution
+  </div>
+</div>
+
+<script>
+  // ===================== STATE =====================
+  let countdownSeconds = 180; // 3 minutes
+  let countdownInterval = null;
+  let panicSeconds = 0;
+  let panicInterval = null;
+  let userCountInterval = null;
+  let clockInterval = null;
+  let seatUpdateInterval = null;
+  let sessionWarningTimeout = null;
+  let captchaAttempts = 0;
+  let currentCaptcha = 'R7K2M9';
+  let captchaCallback = null;
+  let startTime = null;
+  let elapsedSeconds = 0;
+  let payCountdownSeconds = 599;
+  let payCountdownInterval = null;
+
+  const CAPTCHA_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+
+  // ===================== HELPERS =====================
+  function pad(n) { return String(n).padStart(2, '0'); }
+
+  function formatSeconds(s) {
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const sec = s % 60;
+    return pad(h) + ':' + pad(m) + ':' + pad(sec);
+  }
+
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-' + id).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  function getTomorrowDate() {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    const dd = pad(d.getDate());
+    const mm = pad(d.getMonth() + 1);
+    const yyyy = d.getFullYear();
+    return dd + '/' + mm + '/' + yyyy;
+  }
+
+  function randomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  // ===================== LIVE CLOCK =====================
+  function updateClock() {
+    const now = new Date();
+    const h = pad(now.getHours());
+    const m = pad(now.getMinutes());
+    const s = pad(now.getSeconds());
+    const el = document.getElementById('liveClock');
+    if (el) el.textContent = h + ':' + m + ':' + s + ' IST';
+  }
+
+  clockInterval = setInterval(updateClock, 1000);
+  updateClock();
+
+  // ===================== USER COUNT =====================
+  function updateUserCount() {
+    const count = randomInt(1200, 1800);
+    const el = document.getElementById('userCount');
+    if (el) el.textContent = count.toLocaleString('en-IN');
+  }
+
+  updateUserCount();
+  userCountInterval = setInterval(updateUserCount, 3000);
+
+  // ===================== JOURNEY DATE =====================
+  document.getElementById('journeyDate').value = getTomorrowDate();
+  document.getElementById('resultDate').textContent = getTomorrowDate();
+  document.getElementById('passengerDate').textContent = getTomorrowDate();
+
+  // ===================== COUNTDOWN =====================
+  function startCountdown() {
+    document.getElementById('startBtn').disabled = true;
+    document.getElementById('startBtn').textContent = 'Hang tight...';
+    startTime = Date.now();
+
+    countdownInterval = setInterval(() => {
+      countdownSeconds--;
+      if (countdownSeconds <= 0) {
+        clearInterval(countdownInterval);
+        document.getElementById('countdownDisplay').textContent = '00:00:00';
+        setTimeout(() => openTatkal(), 400);
+      } else {
+        const h = Math.floor(countdownSeconds / 3600);
+        const m = Math.floor((countdownSeconds % 3600) / 60);
+        const s = countdownSeconds % 60;
+        document.getElementById('countdownDisplay').textContent =
+          pad(h) + ':' + pad(m) + ':' + pad(s);
+      }
+    }, 1000);
+  }
+
+  // ===================== OPEN TATKAL =====================
+  function openTatkal() {
+    // Show panic bar
+    document.getElementById('panicBar').style.display = 'flex';
+
+    // Start panic clock
+    panicSeconds = 0;
+    panicInterval = setInterval(() => {
+      panicSeconds++;
+      document.getElementById('panicTime').textContent = formatSeconds(panicSeconds);
+    }, 1000);
+
+    // Start session timeout warning after 45s
+    sessionWarningTimeout = setTimeout(() => {
+      showSessionWarning();
+    }, 45000);
+
+    showScreen('search');
+    startTime = Date.now();
+  }
+
+  // ===================== SESSION WARNING =====================
+  function showSessionWarning() {
+    const popup = document.getElementById('timeoutPopup');
+    popup.style.display = 'block';
+    let secs = 300;
+    const interval = setInterval(() => {
+      secs--;
+      const m = Math.floor(secs / 60);
+      const s = secs % 60;
+      const el = document.getElementById('sessionCountdown');
+      if (el) el.textContent = m + ':' + pad(s);
+      if (secs <= 0) {
+        clearInterval(interval);
+        popup.style.display = 'none';
+      }
+    }, 1000);
+    setTimeout(() => { popup.style.display = 'none'; }, 8000);
+  }
+
+  // ===================== SEARCH =====================
+  function searchTrains() {
+    const btn = event.target;
+    btn.textContent = 'Searching...';
+    btn.disabled = true;
+    setTimeout(() => {
+      btn.textContent = 'Search Trains';
+      btn.disabled = false;
+      showScreen('trains');
+      startSeatUpdates();
+    }, 1200);
+  }
+
+  // ===================== SEAT UPDATES (GETTING WORSE) =====================
+  let updateCount = 0;
+  function startSeatUpdates() {
+    seatUpdateInterval = setInterval(() => {
+      updateCount++;
+
+      // WL always goes up, RAC goes down, never improves
+      const t1wl = document.querySelector('.t1-wl');
+      const t1rac = document.querySelector('.t1-rac');
+      const t2wl = document.querySelector('.t2-wl');
+      const t2rac = document.querySelector('.t2-rac');
+      const t3wl = document.querySelector('.t3-wl');
+      const t3rac = document.querySelector('.t3-rac');
+
+      if (t1wl) t1wl.textContent = parseInt(t1wl.textContent) + randomInt(2, 6);
+      if (t1rac && parseInt(t1rac.textContent) > 0) t1rac.textContent = Math.max(0, parseInt(t1rac.textContent) - 1);
+      if (t2wl) t2wl.textContent = parseInt(t2wl.textContent) + randomInt(1, 4);
+      if (t2rac && parseInt(t2rac.textContent) > 0) t2rac.textContent = Math.max(0, parseInt(t2rac.textContent) - 1);
+      if (t3wl) t3wl.textContent = parseInt(t3wl.textContent) + randomInt(3, 8);
+
+      const now = new Date();
+      const timeStr = pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds());
+      document.getElementById('seatNote1').textContent = 'Last updated: ' + timeStr;
+      document.getElementById('seatNote2').textContent = 'Last updated: ' + timeStr;
+      document.getElementById('seatNote3').textContent = 'Last updated: ' + timeStr;
+    }, 30000);
+  }
+
+  // ===================== BOOK TRAIN (shows captcha) =====================
+  function bookTrain(trainIdx) {
+    captchaAttempts = 0;
+    refreshCaptcha();
+    document.getElementById('captchaInput').value = '';
+    document.getElementById('captchaError').style.display = 'none';
+    document.getElementById('captchaOverlay').style.display = 'flex';
+    captchaCallback = () => {
+      clearInterval(seatUpdateInterval);
+      showScreen('passenger');
+    };
+  }
+
+  // ===================== CAPTCHA =====================
+  function refreshCaptcha() {
+    let result = '';
+    for (let i = 0; i < 6; i++) {
+      result += CAPTCHA_CHARS[randomInt(0, CAPTCHA_CHARS.length - 1)];
+    }
+    currentCaptcha = result;
+    document.getElementById('captchaText').textContent = result;
+    document.getElementById('captchaInput').value = '';
+    document.getElementById('captchaError').style.display = 'none';
+  }
+
+  function submitCaptcha() {
+    const input = document.getElementById('captchaInput').value.toUpperCase().trim();
+    const errorEl = document.getElementById('captchaError');
+
+    // First attempt always fails (IRCTC behavior)
+    if (captchaAttempts === 0) {
+      captchaAttempts++;
+      errorEl.textContent = 'Invalid captcha. Please try again.';
+      errorEl.style.display = 'block';
+      const inputEl = document.getElementById('captchaInput');
+      inputEl.classList.remove('shake');
+      void inputEl.offsetWidth;
+      inputEl.classList.add('shake');
+      refreshCaptcha();
+      return;
+    }
+
+    // Second attempt succeeds (if they typed anything)
+    if (input.length === 6) {
+      document.getElementById('captchaOverlay').style.display = 'none';
+      if (captchaCallback) captchaCallback();
+    } else {
+      errorEl.textContent = 'Please enter all 6 characters.';
+      errorEl.style.display = 'block';
+      const inputEl = document.getElementById('captchaInput');
+      inputEl.classList.remove('shake');
+      void inputEl.offsetWidth;
+      inputEl.classList.add('shake');
+    }
+  }
+
+  // Allow enter key in captcha
+  document.getElementById('captchaInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') submitCaptcha();
+  });
+
+  // ===================== PAYMENT =====================
+  function selectPayment(el) {
+    document.querySelectorAll('.payment-option').forEach(o => {
+      o.classList.remove('selected');
+      o.querySelector('input[type=radio]').checked = false;
+    });
+    el.classList.add('selected');
+    el.querySelector('input[type=radio]').checked = true;
+  }
+
+  function proceedToPayment() {
+    showScreen('payment');
+    payCountdownSeconds = 599;
+    payCountdownInterval = setInterval(() => {
+      payCountdownSeconds--;
+      const m = Math.floor(payCountdownSeconds / 60);
+      const s = payCountdownSeconds % 60;
+      const el = document.getElementById('payCountdown');
+      if (el) el.textContent = m + ':' + pad(s);
+      if (payCountdownSeconds <= 0) {
+        clearInterval(payCountdownInterval);
+        triggerFailure('session_expired');
+      }
+    }, 1000);
+  }
+
+  // ===================== INITIATE PAYMENT =====================
+  const spinnerMessages = [
+    'Connecting to payment gateway...',
+    'Verifying bank credentials...',
+    'Communicating with NPCI...',
+    'Awaiting bank response...',
+    'This is taking longer than expected...',
+  ];
+
+  function initiatePayment() {
+    const overlay = document.getElementById('spinnerOverlay');
+    const textEl = document.getElementById('spinnerText');
+    overlay.style.display = 'flex';
+
+    let msgIdx = 0;
+    const msgInterval = setInterval(() => {
+      msgIdx = (msgIdx + 1) % spinnerMessages.length;
+      textEl.innerHTML = spinnerMessages[msgIdx] +
+        '<br><span style="font-size:11px; color:#888;">Please do not press Back or Refresh</span>';
+    }, 700);
+
+    setTimeout(() => {
+      clearInterval(msgInterval);
+      overlay.style.display = 'none';
+      clearInterval(payCountdownInterval);
+      triggerFailure();
+    }, 3200);
+  }
+
+  // ===================== FAILURE =====================
+  const failureReasons = [
+    { text: 'Your session has expired. Please try again.', code: 'ERR_SESSION_EXPIRED_10AM', wl: 47 },
+    { text: 'Payment gateway timeout. Transaction could not be processed.', code: 'ERR_504_GW_TIMEOUT', wl: 47 },
+    { text: 'Tatkal quota exhausted. No seats available.', code: 'ERR_QUOTA_EXHAUSTED_TATKAL', wl: 51 },
+    { text: 'Transaction failed. Your bank declined the payment.', code: 'ERR_BANK_DECLINE_999', wl: 47 },
+    { text: 'Seat you selected is no longer available.', code: 'ERR_SEAT_CONFLICT_RACE_COND', wl: 53 },
+  ];
+
+  function triggerFailure(type) {
+    clearInterval(panicInterval);
+    clearInterval(seatUpdateInterval);
+    clearInterval(payCountdownInterval);
+
+    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+    elapsedSeconds = elapsed;
+
+    const reasonIdx = type === 'session_expired' ? 0 : randomInt(0, failureReasons.length - 1);
+    const reason = failureReasons[reasonIdx];
+
+    showScreen('failure');
+
+    // Screen shake
+    const container = document.getElementById('mainContainer');
+    container.classList.remove('screen-shake');
+    void container.offsetWidth;
+    container.classList.add('screen-shake');
+    setTimeout(() => container.classList.remove('screen-shake'), 700);
+
+    document.getElementById('failureReason').textContent = reason.text;
+    document.getElementById('errorCode').textContent = reason.code;
+    document.getElementById('failTxnId').textContent = 'TXN' + randomInt(100000000, 999999999);
+
+    const wlNum = reason.wl;
+    document.querySelector('.failure-wl').innerHTML =
+      'WL ' + wlNum + '. Same as last year. Same as every year.<br>' +
+      '<span style="font-size:10px; color:#999;">Current Position: WL/' + wlNum +
+      ' | Confirmation Probability: 2%</span>';
+
+    const timeStr = elapsed + 's';
+    document.getElementById('failureTimeDisplay').textContent = elapsed + ' seconds';
+    document.getElementById('lbYourTime').textContent = timeStr;
+    document.getElementById('shareTimeBtn').textContent = timeStr;
+  }
+
+  // ===================== RESET =====================
+  function resetApp() {
+    // Reset state
+    countdownSeconds = 180;
+    panicSeconds = 0;
+    captchaAttempts = 0;
+    updateCount = 0;
+    clearInterval(countdownInterval);
+    clearInterval(panicInterval);
+    clearInterval(seatUpdateInterval);
+    clearInterval(payCountdownInterval);
+    clearTimeout(sessionWarningTimeout);
+
+    document.getElementById('panicBar').style.display = 'none';
+    document.getElementById('panicTime').textContent = '00:00:00';
+    document.getElementById('countdownDisplay').textContent = '00:03:00';
+    document.getElementById('startBtn').disabled = false;
+    document.getElementById('startBtn').textContent = "I'm Ready to Suffer";
+    document.getElementById('timeoutPopup').style.display = 'none';
+
+    // Reset seat counts
+    document.querySelector('.t1-rac').textContent = '3';
+    document.querySelector('.t1-wl').textContent = '47';
+    document.querySelector('.t2-rac').textContent = '1';
+    document.querySelector('.t2-wl').textContent = '23';
+    document.querySelector('.t3-rac').textContent = '0';
+    document.querySelector('.t3-wl').textContent = '89';
+
+    document.getElementById('seatNote1').textContent = 'Last updated: just now';
+    document.getElementById('seatNote2').textContent = 'Last updated: just now';
+    document.getElementById('seatNote3').textContent = 'Last updated: just now';
+
+    updateUserCount();
+    updateClock();
+    showScreen('waiting');
+  }
+
+  // ===================== SHARE =====================
+  function shareResult() {
+    const text = 'I survived ' + elapsedSeconds + 's of IRCTC Tatkal booking and got WL/47. Send help. #TatkalRoulette';
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Copied to clipboard! Share your suffering:\n\n' + text);
+      });
+    } else {
+      alert('Share this:\n\n' + text);
+    }
+  }
+
+  // ===================== MISC: session timer display =====================
+  // These are fake session timers that count down nervously
+  let fakeSessionSecs = 1795;
+  setInterval(() => {
+    fakeSessionSecs = Math.max(0, fakeSessionSecs - 1);
+    const m = Math.floor(fakeSessionSecs / 60);
+    const s = fakeSessionSecs % 60;
+    const str = m + ':' + pad(s);
+    const els = document.querySelectorAll('#searchSessionTimer, #trainsSessionNote, #passSessionNote');
+    els.forEach(el => { if (el) el.textContent = 'Session: ' + str; });
+  }, 1000);
+</script>
+</body>
+</html>

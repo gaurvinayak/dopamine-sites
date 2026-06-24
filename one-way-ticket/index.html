@@ -1,0 +1,2277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>One-Way Ticket — The Daydream Made Tactile</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ocean: #003580;
+    --ocean-dark: #002060;
+    --ocean-light: #0057b8;
+    --accent: #ff6b00;
+    --accent-yellow: #ffb800;
+    --white: #ffffff;
+    --off-white: #f5f7fa;
+    --text: #1a1a2e;
+    --text-muted: #6b7280;
+    --border: #e5e7eb;
+    --success: #10b981;
+    --danger: #ef4444;
+    --card-shadow: 0 4px 24px rgba(0,53,128,0.10);
+    --card-shadow-hover: 0 8px 40px rgba(0,53,128,0.18);
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--off-white);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: linear-gradient(135deg, var(--ocean-dark) 0%, var(--ocean) 60%, var(--ocean-light) 100%);
+    color: white;
+    padding: 0;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.8s ease;
+  }
+
+  .header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--dest-overlay, transparent);
+    transition: background 0.8s ease;
+    pointer-events: none;
+  }
+
+  .header-inner {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 28px 20px 32px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+
+  .brand-logo {
+    font-size: 28px;
+    line-height: 1;
+  }
+
+  .brand-name {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: white;
+  }
+
+  .brand-name span { color: var(--accent-yellow); }
+
+  .header-tagline {
+    font-size: 13px;
+    font-weight: 400;
+    opacity: 0.75;
+    margin-bottom: 28px;
+    letter-spacing: 0.3px;
+  }
+
+  /* ── DEST HERO TEXT ── */
+  .dest-hero {
+    display: none;
+    text-align: center;
+    padding: 20px 0 8px;
+    animation: fadeInUp 0.5s ease;
+  }
+  .dest-hero.visible { display: block; }
+  .dest-hero-emoji { font-size: 48px; line-height: 1; margin-bottom: 8px; }
+  .dest-hero-name { font-size: 26px; font-weight: 700; color: white; }
+  .dest-hero-sub { font-size: 13px; opacity: 0.8; margin-top: 4px; }
+
+  /* ── SEARCH BOX ── */
+  .search-box {
+    background: white;
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  }
+
+  .search-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .search-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .search-field label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+  }
+
+  .search-field input,
+  .search-field select {
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    background: var(--off-white);
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+
+  .search-field input:focus,
+  .search-field select:focus {
+    border-color: var(--ocean);
+  }
+
+  .search-row-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 12px;
+    align-items: flex-end;
+  }
+
+  .btn-search {
+    background: linear-gradient(135deg, var(--accent) 0%, #ff9500 100%);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 11px 22px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 4px 16px rgba(255,107,0,0.35);
+  }
+
+  .btn-search:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(255,107,0,0.45);
+  }
+
+  .btn-search:active { transform: translateY(0); }
+
+  /* ── MAIN CONTENT ── */
+  .main {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 24px 20px 80px;
+  }
+
+  /* ── SECTION HEADER ── */
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    margin-top: 28px;
+  }
+
+  .section-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .section-badge {
+    background: var(--ocean);
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.3px;
+  }
+
+  /* ── FLIGHT CARD ── */
+  .flight-card {
+    background: white;
+    border-radius: var(--radius);
+    padding: 18px;
+    margin-bottom: 12px;
+    box-shadow: var(--card-shadow);
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    position: relative;
+  }
+
+  .flight-card:hover {
+    box-shadow: var(--card-shadow-hover);
+    border-color: var(--ocean-light);
+    transform: translateY(-2px);
+  }
+
+  .flight-card.selected {
+    border-color: var(--ocean);
+    background: #f0f5ff;
+  }
+
+  .flight-badge {
+    position: absolute;
+    top: -10px;
+    right: 16px;
+    background: linear-gradient(135deg, var(--accent-yellow), var(--accent));
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+  }
+
+  .flight-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .airline-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .airline-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 800;
+    color: white;
+    flex-shrink: 0;
+  }
+
+  .airline-logo.indigo { background: linear-gradient(135deg, #3b0d8c, #6b3fe3); }
+  .airline-logo.airindia { background: linear-gradient(135deg, #c8102e, #e63950); }
+  .airline-logo.spicejet { background: linear-gradient(135deg, #e8452c, #ff6b45); }
+
+  .airline-name { font-size: 14px; font-weight: 600; }
+  .airline-code { font-size: 11px; color: var(--text-muted); }
+
+  .flight-price {
+    text-align: right;
+  }
+
+  .price-amount {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--ocean);
+  }
+
+  .price-label { font-size: 10px; color: var(--text-muted); }
+
+  .flight-route {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .route-time { font-size: 20px; font-weight: 700; }
+  .route-city { font-size: 10px; color: var(--text-muted); font-weight: 500; }
+
+  .route-mid {
+    text-align: center;
+  }
+
+  .route-duration {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  .route-line {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin: 4px 0;
+  }
+
+  .route-line::before,
+  .route-line::after {
+    content: '';
+    flex: 1;
+    height: 1.5px;
+    background: var(--border);
+  }
+
+  .route-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+  }
+
+  .route-stop {
+    font-size: 10px;
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .flight-right { text-align: right; }
+
+  .flight-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  .flight-tag {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-muted);
+    background: var(--off-white);
+    padding: 3px 8px;
+    border-radius: 6px;
+  }
+
+  .btn-select {
+    background: var(--ocean);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 20px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-select:hover { background: var(--ocean-light); }
+
+  .btn-select.selected-btn {
+    background: var(--success);
+  }
+
+  /* ── HOTEL CARDS ── */
+  .hotel-card {
+    background: white;
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 14px;
+    box-shadow: var(--card-shadow);
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+
+  .hotel-card:hover {
+    box-shadow: var(--card-shadow-hover);
+    transform: translateY(-2px);
+  }
+
+  .hotel-card.selected { border-color: var(--ocean); }
+
+  .hotel-photo {
+    height: 130px;
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    padding: 12px;
+  }
+
+  .hotel-photo-rating {
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(4px);
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+
+  .hotel-body { padding: 16px; }
+
+  .hotel-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .hotel-name { font-size: 15px; font-weight: 700; }
+  .hotel-desc { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+  .hotel-price-block { text-align: right; }
+  .hotel-price { font-size: 18px; font-weight: 800; color: var(--ocean); }
+  .hotel-per { font-size: 10px; color: var(--text-muted); }
+
+  .amenity-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 10px 0;
+  }
+
+  .pill {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: var(--off-white);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+  }
+
+  .hotel-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+
+  .hotel-review { font-size: 11px; color: var(--text-muted); }
+
+  .btn-book-hotel {
+    background: linear-gradient(135deg, var(--ocean), var(--ocean-light));
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 18px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-book-hotel:hover { opacity: 0.9; }
+  .btn-book-hotel.booked { background: linear-gradient(135deg, var(--success), #059669); }
+
+  /* ── ITINERARY CARD ── */
+  .itinerary-card {
+    background: white;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+    margin-top: 8px;
+  }
+
+  .itinerary-header {
+    background: linear-gradient(135deg, var(--ocean-dark), var(--ocean));
+    color: white;
+    padding: 20px;
+  }
+
+  .itinerary-title {
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+
+  .itinerary-subtitle { font-size: 13px; opacity: 0.8; }
+
+  .itinerary-summary {
+    padding: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .summary-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--border);
+    font-size: 14px;
+  }
+
+  .summary-row:last-child { border-bottom: none; }
+  .summary-label { color: var(--text-muted); font-weight: 500; }
+  .summary-value { font-weight: 600; }
+
+  .summary-total {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    background: linear-gradient(135deg, #fff8f0, #fff3e0);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .total-label { font-size: 15px; font-weight: 700; }
+  .total-amount { font-size: 24px; font-weight: 800; color: var(--accent); }
+
+  /* ── DAYS ── */
+  .days-section { padding: 20px; }
+  .days-title { font-size: 14px; font-weight: 700; margin-bottom: 14px; color: var(--ocean); }
+
+  .day-block {
+    margin-bottom: 16px;
+  }
+
+  .day-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: white;
+    background: var(--ocean);
+    display: inline-block;
+    padding: 3px 12px;
+    border-radius: 20px;
+    margin-bottom: 8px;
+  }
+
+  .day-activities { padding-left: 4px; }
+
+  .activity-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 6px 0;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .activity-emoji { font-size: 16px; flex-shrink: 0; line-height: 1.4; }
+
+  /* ── ADD-ONS ── */
+  .addons-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-top: 1px solid var(--border);
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ocean);
+    user-select: none;
+    transition: background 0.15s;
+  }
+
+  .addons-toggle:hover { background: var(--off-white); }
+
+  .addons-toggle-icon {
+    font-size: 18px;
+    transition: transform 0.3s;
+  }
+
+  .addons-toggle.open .addons-toggle-icon { transform: rotate(180deg); }
+
+  .addons-panel {
+    display: none;
+    padding: 0 20px 20px;
+  }
+
+  .addons-panel.open { display: block; }
+
+  .addon-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--border);
+  }
+
+  .addon-item:last-child { border-bottom: none; }
+
+  .addon-info { font-size: 13px; }
+  .addon-name { font-weight: 600; }
+  .addon-price { color: var(--text-muted); font-size: 12px; }
+
+  .btn-addon {
+    background: none;
+    border: 1.5px solid var(--ocean);
+    color: var(--ocean);
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-addon:hover, .btn-addon.added {
+    background: var(--ocean);
+    color: white;
+  }
+
+  /* ── BOOK BUTTON ── */
+  .book-btn-wrapper {
+    padding: 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  .btn-book-all {
+    width: 100%;
+    background: linear-gradient(135deg, var(--accent) 0%, #ff9500 100%);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.25s;
+    box-shadow: 0 6px 24px rgba(255,107,0,0.4);
+    letter-spacing: 0.3px;
+  }
+
+  .btn-book-all:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 32px rgba(255,107,0,0.5);
+  }
+
+  /* ── PAYMENT MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.65);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .modal-overlay.active { display: flex; }
+
+  .modal {
+    background: white;
+    border-radius: var(--radius);
+    width: 100%;
+    max-width: 480px;
+    overflow: hidden;
+    animation: modalIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes modalIn {
+    from { transform: scale(0.8) translateY(40px); opacity: 0; }
+    to { transform: scale(1) translateY(0); opacity: 1; }
+  }
+
+  .modal-header {
+    background: linear-gradient(135deg, var(--ocean-dark), var(--ocean));
+    color: white;
+    padding: 20px;
+  }
+
+  .modal-title { font-size: 17px; font-weight: 700; }
+  .modal-sub { font-size: 12px; opacity: 0.8; margin-top: 2px; }
+
+  .modal-body { padding: 20px; }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 12px;
+  }
+
+  .form-group.full { grid-column: 1 / -1; }
+
+  .form-group label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+  }
+
+  .form-group input {
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 11px 14px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .form-group input:focus { border-color: var(--ocean); }
+
+  .secure-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--success);
+    font-weight: 500;
+    margin-bottom: 14px;
+  }
+
+  .btn-pay {
+    width: 100%;
+    background: linear-gradient(135deg, var(--success), #059669);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-pay:hover { opacity: 0.92; }
+
+  /* ── PROCESSING ── */
+  .processing-screen {
+    display: none;
+    text-align: center;
+    padding: 40px 20px;
+  }
+
+  .processing-screen.active { display: block; }
+
+  .spinner {
+    width: 56px;
+    height: 56px;
+    border: 4px solid var(--border);
+    border-top-color: var(--ocean);
+    border-radius: 50%;
+    margin: 0 auto 20px;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .processing-text { font-size: 15px; font-weight: 600; color: var(--ocean); }
+  .processing-sub { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+
+  /* ── CONFIRMATION ── */
+  .confirmation-card {
+    background: white;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+    margin-top: 8px;
+  }
+
+  .confirmation-hero {
+    background: linear-gradient(135deg, var(--success), #059669);
+    color: white;
+    padding: 32px 20px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .confirmation-hero::before {
+    content: '✈️';
+    font-size: 80px;
+    position: absolute;
+    top: -20px;
+    right: -10px;
+    opacity: 0.15;
+    line-height: 1;
+  }
+
+  .conf-checkmark {
+    width: 56px;
+    height: 56px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    margin: 0 auto 14px;
+  }
+
+  .conf-title { font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+  .conf-sub { font-size: 13px; opacity: 0.85; }
+
+  .booking-id-block {
+    padding: 16px 20px;
+    background: var(--off-white);
+    border-bottom: 1px solid var(--border);
+    text-align: center;
+  }
+
+  .booking-id-label { font-size: 11px; font-weight: 600; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; }
+  .booking-id { font-size: 18px; font-weight: 800; color: var(--ocean); letter-spacing: 2px; margin-top: 2px; font-family: monospace; }
+
+  .conf-details { padding: 20px; }
+
+  .conf-detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    font-size: 13px;
+    border-bottom: 1px dashed var(--border);
+  }
+
+  .conf-detail-row:last-child { border-bottom: none; }
+  .conf-detail-label { color: var(--text-muted); }
+  .conf-detail-value { font-weight: 600; }
+
+  .reality-check {
+    margin: 0 20px 20px;
+    background: linear-gradient(135deg, #fff8e1, #fff3cd);
+    border: 1px solid #ffc107;
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #7c5300;
+    text-align: center;
+  }
+
+  /* ── CONFETTI ── */
+  .confetti-wrapper {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9999;
+    overflow: hidden;
+  }
+
+  .confetti-piece {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    top: -20px;
+    animation: confettiFall linear forwards;
+    border-radius: 2px;
+  }
+
+  @keyframes confettiFall {
+    to {
+      transform: translateY(110vh) rotate(720deg);
+      opacity: 0;
+    }
+  }
+
+  /* ── SHARE BUTTON ── */
+  .share-section {
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+  }
+
+  .btn-share {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #1da1f2, #0d8bd9);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 22px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-share:hover { opacity: 0.9; transform: translateY(-1px); }
+
+  .share-text-box {
+    display: none;
+    margin-top: 14px;
+    background: var(--off-white);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    font-size: 13px;
+    text-align: left;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  .share-text-box.visible { display: block; animation: fadeIn 0.3s ease; }
+
+  /* ── RESIGNATION SECTION ── */
+  .resignation-section {
+    background: white;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+    margin-top: 20px;
+    border: 2px solid #fee2e2;
+  }
+
+  .resignation-header {
+    background: linear-gradient(135deg, #7f1d1d, var(--danger));
+    color: white;
+    padding: 20px;
+    text-align: center;
+  }
+
+  .resignation-title { font-size: 18px; font-weight: 800; }
+  .resignation-sub { font-size: 12px; opacity: 0.8; margin-top: 4px; }
+
+  .resignation-body { padding: 20px; text-align: center; }
+
+  .btn-resign {
+    background: var(--danger);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 14px 36px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    animation: tremble 0.3s ease infinite alternate;
+    box-shadow: 0 4px 20px rgba(239,68,68,0.4);
+  }
+
+  @keyframes tremble {
+    from { transform: rotate(-0.8deg) scale(1); }
+    to { transform: rotate(0.8deg) scale(1.01); }
+  }
+
+  .btn-resign:hover {
+    background: #c81e1e;
+    animation: none;
+    transform: scale(1.03);
+  }
+
+  .resign-disclaimer {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 10px;
+  }
+
+  /* ── EMAIL COMPOSER ── */
+  .email-composer {
+    display: none;
+    padding: 0 20px 20px;
+    animation: fadeInUp 0.4s ease;
+  }
+
+  .email-composer.visible { display: block; }
+
+  .email-window {
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+  }
+
+  .email-toolbar {
+    background: #f3f4f6;
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .email-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  .email-dot.red { background: var(--danger); }
+  .email-dot.yellow { background: var(--accent-yellow); }
+  .email-dot.green { background: var(--success); }
+
+  .email-subject-bar {
+    background: white;
+    padding: 10px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+
+  .email-subject-bar span { color: var(--text); }
+
+  .email-fields { padding: 14px; }
+
+  .email-field {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--off-white);
+    font-size: 12px;
+  }
+
+  .email-field:last-child { border-bottom: none; }
+
+  .ef-label {
+    font-weight: 600;
+    color: var(--text-muted);
+    min-width: 60px;
+    padding-top: 1px;
+  }
+
+  .ef-value { color: var(--text); line-height: 1.6; }
+
+  .email-send-row {
+    padding: 14px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+
+  .btn-send {
+    background: linear-gradient(135deg, var(--danger), #c81e1e);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 28px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-send:hover { opacity: 0.9; }
+
+  /* ── EMAIL FLYING ANIMATION ── */
+  .email-fly-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+
+  .email-fly-overlay.active {
+    display: flex;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .flying-envelope {
+    font-size: 60px;
+    animation: flyUp 2s ease-in forwards;
+    display: inline-block;
+  }
+
+  @keyframes flyUp {
+    0% { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+    40% { transform: translateY(-80px) rotate(-15deg) scale(1.2); opacity: 1; }
+    70% { transform: translateY(-200px) rotate(-30deg) scale(0.8); opacity: 0.6; }
+    85% { transform: translateY(-400px) rotate(-50deg) scale(0.3); opacity: 0.2; }
+    90% { transform: translateY(-500px) scale(0.1); opacity: 0; }
+    100% { transform: translateY(-600px) scale(0.01); opacity: 0; }
+  }
+
+  .fly-text {
+    color: white;
+    text-align: center;
+    margin-top: 20px;
+    font-size: 15px;
+    opacity: 0;
+    animation: fadeIn 0.5s ease 1.2s forwards;
+    padding: 0 30px;
+    line-height: 1.6;
+  }
+
+  .fly-text strong { font-size: 18px; display: block; margin-bottom: 6px; }
+
+  /* ── SECTION SHOW/HIDE ── */
+  .section { display: none; }
+  .section.visible { display: block; animation: fadeInUp 0.5s ease; }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* ── DESTINATION GRADIENTS ── */
+  .bg-goa { background: linear-gradient(135deg, #ff6b6b 0%, #feca57 40%, #ff9ff3 100%); }
+  .bg-bali { background: linear-gradient(135deg, #00b894 0%, #00cec9 40%, #55efc4 100%); }
+  .bg-paris { background: linear-gradient(135deg, #a29bfe 0%, #fd79a8 50%, #e17055 100%); }
+  .bg-manali { background: linear-gradient(135deg, #74b9ff 0%, #dfe6e9 50%, #b2bec3 100%); }
+  .bg-tokyo { background: linear-gradient(135deg, #fd79a8 0%, #fdcb6e 40%, #e84393 100%); }
+  .bg-maldives { background: linear-gradient(135deg, #00cec9 0%, #0984e3 40%, #74b9ff 100%); }
+
+  /* ── STEP INDICATOR ── */
+  .steps-bar {
+    display: flex;
+    gap: 0;
+    margin-bottom: 24px;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    border: 1.5px solid var(--border);
+    background: white;
+  }
+
+  .step-item {
+    flex: 1;
+    text-align: center;
+    padding: 10px 6px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: white;
+    border-right: 1.5px solid var(--border);
+    transition: all 0.3s;
+  }
+
+  .step-item:last-child { border-right: none; }
+  .step-item.active { background: var(--ocean); color: white; }
+  .step-item.done { background: #e8f5e9; color: var(--success); }
+
+  .step-num { font-size: 16px; display: block; margin-bottom: 2px; }
+
+  /* ── EMPTY STATE ── */
+  .empty-notice {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+
+  .empty-notice .big { font-size: 48px; margin-bottom: 12px; }
+
+  /* ── MOBILE ── */
+  @media (max-width: 480px) {
+    .search-row { grid-template-columns: 1fr; }
+    .search-row-3 { grid-template-columns: 1fr 1fr; }
+    .btn-search { grid-column: 1 / -1; }
+    .form-row { grid-template-columns: 1fr; }
+  }
+
+  /* ── LOADING DOTS ── */
+  .loading-dots span {
+    display: inline-block;
+    width: 8px; height: 8px;
+    background: var(--ocean);
+    border-radius: 50%;
+    margin: 0 3px;
+    animation: dot-bounce 1s ease-in-out infinite;
+  }
+
+  .loading-dots span:nth-child(2) { animation-delay: 0.15s; }
+  .loading-dots span:nth-child(3) { animation-delay: 0.3s; }
+
+  @keyframes dot-bounce {
+    0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
+    40% { transform: scale(1.1); opacity: 1; }
+  }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--text);
+    color: white;
+    padding: 12px 22px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 500;
+    z-index: 5000;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    white-space: nowrap;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header class="header" id="mainHeader">
+  <div class="header-inner">
+    <div class="brand">
+      <span class="brand-logo">✈️</span>
+      <span class="brand-name">One<span>Way</span>Ticket</span>
+    </div>
+    <p class="header-tagline">The daydream made tactile. No passport required.</p>
+
+    <div class="dest-hero" id="destHero">
+      <div class="dest-hero-emoji" id="destEmoji"></div>
+      <div class="dest-hero-name" id="destName"></div>
+      <div class="dest-hero-sub" id="destSub"></div>
+    </div>
+
+    <!-- SEARCH BOX -->
+    <div class="search-box">
+      <div class="search-row">
+        <div class="search-field">
+          <label>From</label>
+          <input type="text" value="Your Current Life" readonly style="cursor:not-allowed; color:#6b7280;">
+        </div>
+        <div class="search-field">
+          <label>To — Dream Destination</label>
+          <select id="destSelect" onchange="handleDestChange()">
+            <option value="">Select a destination...</option>
+            <option value="goa">🌊 Goa — Beach Paradise</option>
+            <option value="bali">🌴 Bali — Island Dreams</option>
+            <option value="paris">🗼 Paris — City of Light</option>
+            <option value="manali">🏔️ Manali — Mountain Magic</option>
+            <option value="tokyo">🌸 Tokyo — Cherry Blossoms</option>
+            <option value="maldives">🐠 Maldives — Turquoise Waters</option>
+          </select>
+        </div>
+      </div>
+      <div class="search-row-3">
+        <div class="search-field">
+          <label>Departure Date</label>
+          <input type="date" id="travelDate">
+        </div>
+        <div class="search-field">
+          <label>Adults</label>
+          <select>
+            <option>1 (Just you)</option>
+            <option>2 (Someone lucky)</option>
+          </select>
+        </div>
+        <button class="btn-search" onclick="searchFlights()">🔍 Search Escape</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ── MAIN ── -->
+<main class="main">
+
+  <!-- STEP INDICATOR -->
+  <div class="steps-bar" id="stepsBar" style="display:none;">
+    <div class="step-item active" id="step1"><span class="step-num">✈️</span>Flight</div>
+    <div class="step-item" id="step2"><span class="step-num">🏨</span>Hotel</div>
+    <div class="step-item" id="step3"><span class="step-num">📋</span>Plan</div>
+    <div class="step-item" id="step4"><span class="step-num">🎉</span>Book</div>
+  </div>
+
+  <!-- SEARCHING ANIMATION -->
+  <div class="section" id="searchingSection">
+    <div class="empty-notice">
+      <div class="big">🔍</div>
+      <div style="font-weight:700; font-size:16px; color:var(--text); margin-bottom:8px;">Searching for your escape...</div>
+      <div class="loading-dots"><span></span><span></span><span></span></div>
+    </div>
+  </div>
+
+  <!-- FLIGHT RESULTS -->
+  <div class="section" id="flightSection">
+    <div class="section-header">
+      <div class="section-title" id="flightSectionTitle">Available Flights</div>
+      <div class="section-badge" id="flightCount">3 results</div>
+    </div>
+    <div id="flightCards"></div>
+  </div>
+
+  <!-- HOTEL RESULTS -->
+  <div class="section" id="hotelSection">
+    <div class="section-header">
+      <div class="section-title">Pick Your Hideaway</div>
+      <div class="section-badge">3 options</div>
+    </div>
+    <div id="hotelCards"></div>
+  </div>
+
+  <!-- ITINERARY -->
+  <div class="section" id="itinerarySection">
+    <div class="section-header">
+      <div class="section-title">Your Escape Plan ✨</div>
+    </div>
+    <div class="itinerary-card">
+      <div class="itinerary-header">
+        <div class="itinerary-title" id="itin-dest-title">7 Days in Goa</div>
+        <div class="itinerary-subtitle">Carefully planned. Probably never happening.</div>
+      </div>
+      <div class="itinerary-summary">
+        <div class="summary-row">
+          <span class="summary-label">✈️ Flight</span>
+          <span class="summary-value" id="itin-flight">—</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">🏨 Hotel</span>
+          <span class="summary-value" id="itin-hotel">—</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">📅 Duration</span>
+          <span class="summary-value">7 nights</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">👤 Travellers</span>
+          <span class="summary-value">1 (brave soul)</span>
+        </div>
+      </div>
+      <div class="summary-total">
+        <span class="total-label">Total Estimated Cost</span>
+        <span class="total-amount" id="itin-total">₹0</span>
+      </div>
+      <div class="days-section">
+        <div class="days-title">📍 3-Day Highlights</div>
+        <div id="dayBlocks"></div>
+      </div>
+      <!-- ADD-ONS -->
+      <div class="addons-toggle" onclick="toggleAddons(this)" id="addonsToggle">
+        <span>➕ Add Activities (optional)</span>
+        <span class="addons-toggle-icon">▾</span>
+      </div>
+      <div class="addons-panel" id="addonsPanel">
+        <div id="addonsList"></div>
+      </div>
+      <!-- BOOK BUTTON -->
+      <div class="book-btn-wrapper">
+        <button class="btn-book-all" id="bookAllBtn" onclick="openPayment()">
+          Book Everything — <span id="bookBtnTotal">₹0</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONFIRMATION -->
+  <div class="section" id="confirmSection">
+    <div class="confirmation-card">
+      <div class="confirmation-hero">
+        <div class="conf-checkmark">✓</div>
+        <div class="conf-title">Booking Confirmed! 🎉</div>
+        <div class="conf-sub">Check your email... that we didn't send.</div>
+      </div>
+      <div class="booking-id-block">
+        <div class="booking-id-label">Booking Reference</div>
+        <div class="booking-id" id="bookingId">#DREAM2025-GOA-7DAYS</div>
+      </div>
+      <div class="conf-details">
+        <div class="conf-detail-row">
+          <span class="conf-detail-label">Destination</span>
+          <span class="conf-detail-value" id="conf-dest">Goa</span>
+        </div>
+        <div class="conf-detail-row">
+          <span class="conf-detail-label">Flight</span>
+          <span class="conf-detail-value" id="conf-flight">—</span>
+        </div>
+        <div class="conf-detail-row">
+          <span class="conf-detail-label">Hotel</span>
+          <span class="conf-detail-value" id="conf-hotel">—</span>
+        </div>
+        <div class="conf-detail-row">
+          <span class="conf-detail-label">Amount Charged</span>
+          <span class="conf-detail-value" id="conf-total" style="color:var(--accent)">₹0</span>
+        </div>
+        <div class="conf-detail-row">
+          <span class="conf-detail-label">Status</span>
+          <span class="conf-detail-value" style="color:var(--success)">Confirmed (Imaginary)</span>
+        </div>
+      </div>
+      <div class="reality-check">
+        You're not going anywhere. But for a moment, you almost did. 🌊<br>
+        <em style="font-size:11px; opacity:0.8;">No credit cards were harmed in the making of this dream.</em>
+      </div>
+      <div class="share-section">
+        <button class="btn-share" onclick="shareEscape()">
+          🐦 Share Your Escape
+        </button>
+        <div class="share-text-box" id="shareTextBox"></div>
+      </div>
+    </div>
+
+    <!-- RESIGNATION -->
+    <div class="resignation-section">
+      <div class="resignation-header">
+        <div class="resignation-title">Make It Permanent? 💀</div>
+        <div class="resignation-sub">You've got a ticket. All that's left is the letter.</div>
+      </div>
+      <div class="resignation-body">
+        <button class="btn-resign" onclick="openResignation()">
+          📨 Submit Resignation
+        </button>
+        <p class="resign-disclaimer">Legally non-binding. Emotionally questionable.</p>
+      </div>
+      <div class="email-composer" id="emailComposer">
+        <div class="email-window">
+          <div class="email-toolbar">
+            <span class="email-dot red"></span>
+            <span class="email-dot yellow"></span>
+            <span class="email-dot green"></span>
+            <span style="font-size:12px; margin-left:8px; color:#6b7280; font-weight:500;">New Message — Gmail</span>
+          </div>
+          <div class="email-subject-bar">
+            Subject: <span>Resignation — Effective Immediately</span>
+          </div>
+          <div class="email-fields">
+            <div class="email-field">
+              <span class="ef-label">To:</span>
+              <span class="ef-value">boss@company.com</span>
+            </div>
+            <div class="email-field">
+              <span class="ef-label">From:</span>
+              <span class="ef-value">you@company.com</span>
+            </div>
+            <div class="email-field">
+              <span class="ef-label">Body:</span>
+              <span class="ef-value" id="resignBody"></span>
+            </div>
+          </div>
+          <div class="email-send-row">
+            <button class="btn-send" onclick="sendResignation()">
+              📤 SEND
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ── PAYMENT MODAL ── -->
+<div class="modal-overlay" id="paymentModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">💳 Complete Payment</div>
+      <div class="modal-sub">100% fake. 100% satisfying.</div>
+    </div>
+    <div class="modal-body" id="paymentForm">
+      <div class="secure-badge">🔒 256-bit SSL Encrypted (Not really)</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>First Name</label>
+          <input type="text" placeholder="Your name" value="Dream">
+        </div>
+        <div class="form-group">
+          <label>Last Name</label>
+          <input type="text" placeholder="Last name" value="Seeker">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" value="notgoing@somewhere.com">
+      </div>
+      <div class="form-group">
+        <label>Card Number</label>
+        <input type="text" value="4242 4242 4242 4242" placeholder="Card number">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Expiry</label>
+          <input type="text" value="12/29">
+        </div>
+        <div class="form-group">
+          <label>CVV</label>
+          <input type="text" value="🤫">
+        </div>
+      </div>
+      <button class="btn-pay" onclick="processPayment()">
+        ✈️ Pay <span id="modalPayAmount">₹0</span> & Take Off
+      </button>
+      <p style="text-align:center; font-size:11px; color:var(--text-muted); margin-top:12px;">
+        By clicking, you agree that this is all a beautiful lie.
+      </p>
+    </div>
+    <div class="processing-screen" id="processingScreen">
+      <div class="spinner"></div>
+      <div class="processing-text" id="processingText">Booking your flight...</div>
+      <div class="processing-sub">Contacting airlines, hotels, and your destiny</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── EMAIL FLY OVERLAY ── -->
+<div class="email-fly-overlay" id="emailFlyOverlay">
+  <div class="flying-envelope" id="flyingEnvelope">✉️</div>
+  <div class="fly-text" id="flyText">
+    <strong>Email disintegrated mid-flight.</strong>
+    Your job is safe. For now. 😌<br>
+    <span style="font-size:13px; opacity:0.7;">The universe decided you need more practice runs first.</span>
+  </div>
+</div>
+
+<!-- ── CONFETTI ── -->
+<div class="confetti-wrapper" id="confettiWrapper"></div>
+
+<!-- ── TOAST ── -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── STATE ──
+  const state = {
+    destination: null,
+    flight: null,
+    hotel: null,
+    addons: [],
+    total: 0,
+    addonTotal: 0
+  };
+
+  // ── DESTINATION DATA ──
+  const destinations = {
+    goa: {
+      name: 'Goa',
+      emoji: '🌊',
+      sub: 'Where the sun sets on your regrets',
+      bgClass: 'bg-goa',
+      headerGradient: 'linear-gradient(135deg, #ff6b6b44 0%, #feca5733 100%)',
+      code: 'GOI',
+      days: [
+        { label: 'Day 1 — Arrival & Vibes', activities: [
+          { e: '🛬', t: 'Land at Dabolim Airport, feel the warm Goa breeze' },
+          { e: '🏖️', t: 'Check into your stay, hit Baga Beach immediately' },
+          { e: '🦞', t: 'Sunset seafood dinner at a shack — prawn curry & cold beer' },
+          { e: '🎵', t: 'Live music at a beach bar till the stars come out' }
+        ]},
+        { label: 'Day 2 — Adventure Mode', activities: [
+          { e: '🌊', t: 'Morning surf lesson at Ashwem Beach' },
+          { e: '🛵', t: 'Rent a scooter, explore Panjim\'s Portuguese quarter' },
+          { e: '🛒', t: 'Anjuna flea market — spices, sarongs, and nostalgia' },
+          { e: '🌅', t: 'Dudhsagar waterfall trek before golden hour' }
+        ]},
+        { label: 'Day 3 — Slow Down & Let Go', activities: [
+          { e: '🧘', t: 'Sunrise yoga at Morjim Beach' },
+          { e: '💆', t: 'Full-body Ayurvedic spa treatment (2 hours)' },
+          { e: '☕', t: 'Lazy brunch at a heritage Portuguese café' },
+          { e: '✈️', t: 'Check out. Carry the salt air home in your memory.' }
+        ]}
+      ],
+      addons: [
+        { name: '🏄 Surfing Lesson (2hrs)', price: 800 },
+        { name: '🍜 Goan Cooking Class', price: 1200 },
+        { name: '🤿 Snorkeling Trip', price: 1500 },
+        { name: '🛶 Backwater Kayaking', price: 950 }
+      ]
+    },
+    bali: {
+      name: 'Bali',
+      emoji: '🌴',
+      sub: 'Rice fields, temples & total surrender',
+      bgClass: 'bg-bali',
+      headerGradient: 'linear-gradient(135deg, #00b89444 0%, #55efc433 100%)',
+      code: 'DPS',
+      days: [
+        { label: 'Day 1 — Sacred & Serene', activities: [
+          { e: '🛬', t: 'Arrive at Ngurah Rai, feel humidity hug you like an old friend' },
+          { e: '🛕', t: 'Sunset at Tanah Lot temple — the ocean views will break you' },
+          { e: '🍜', t: 'Nasi goreng and satay at a warung by the rice fields' },
+          { e: '🌺', t: 'Night walk through Seminyak, incense in the air' }
+        ]},
+        { label: 'Day 2 — Into the Green', activities: [
+          { e: '🌾', t: 'Early morning walk through Tegalalang Rice Terraces' },
+          { e: '🐒', t: 'Monkey Forest sanctuary in Ubud — lose your sunglasses' },
+          { e: '🎨', t: 'Batik painting class with a local artist' },
+          { e: '🌊', t: 'Balangan Beach for a sunset swim' }
+        ]},
+        { label: 'Day 3 — Peak & Peace', activities: [
+          { e: '🌋', t: 'Pre-dawn hike up Mount Batur for sunrise (totally worth it)' },
+          { e: '♨️', t: 'Natural hot springs after the trek' },
+          { e: '💆', t: '90-min traditional Balinese massage — ₹600' },
+          { e: '✈️', t: 'Final mango lassi. Depart with a heavy heart.' }
+        ]}
+      ],
+      addons: [
+        { name: '🌋 Mount Batur Trek', price: 1800 },
+        { name: '🎨 Batik Art Workshop', price: 900 },
+        { name: '🤿 Nusa Penida Dive', price: 2200 },
+        { name: '🧘 Ubud Yoga Retreat', price: 1400 }
+      ]
+    },
+    paris: {
+      name: 'Paris',
+      emoji: '🗼',
+      sub: 'Croissants, cobblestones & existential crises',
+      bgClass: 'bg-paris',
+      headerGradient: 'linear-gradient(135deg, #a29bfe44 0%, #fd79a833 100%)',
+      code: 'CDG',
+      days: [
+        { label: 'Day 1 — Bonjour, Beautiful', activities: [
+          { e: '✈️', t: 'Land at Charles de Gaulle, immediately feel underdressed' },
+          { e: '🗼', t: 'Eiffel Tower at dusk — actually as magical as promised' },
+          { e: '🥐', t: 'Dinner at a brasserie: steak frites, Bordeaux, and wonder' },
+          { e: '🌉', t: 'Walk along the Seine under the streetlights' }
+        ]},
+        { label: 'Day 2 — Museums & Macrons', activities: [
+          { e: '🎨', t: 'Louvre in the morning — 2 hours minimum for Mona Lisa queue' },
+          { e: '☕', t: 'Café in the Marais district, people-watch seriously' },
+          { e: '🛍️', t: 'Vintage shops on Rue de Bretagne' },
+          { e: '🌷', t: 'Sacré-Cœur at sunset — views of the whole golden city' }
+        ]},
+        { label: 'Day 3 — The Grand Exit', activities: [
+          { e: '🧇', t: 'Crêpes from a street cart for breakfast — mandatory' },
+          { e: '🏰', t: 'Day trip to Versailles — be humbled by excess' },
+          { e: '🍷', t: 'Final dinner: wine, cheese, baguette, dignity' },
+          { e: '✈️', t: 'Au revoir. You\'ll be back. You always come back.' }
+        ]}
+      ],
+      addons: [
+        { name: '🚂 Versailles Day Trip', price: 2100 },
+        { name: '🍷 Wine & Cheese Tour', price: 1800 },
+        { name: '🎨 Louvre Private Guide', price: 3200 },
+        { name: '🥐 Baking Class', price: 1500 }
+      ]
+    },
+    manali: {
+      name: 'Manali',
+      emoji: '🏔️',
+      sub: 'Snow peaks, silence & bone-cold clarity',
+      bgClass: 'bg-manali',
+      headerGradient: 'linear-gradient(135deg, #74b9ff44 0%, #dfe6e933 100%)',
+      code: 'KUU',
+      days: [
+        { label: 'Day 1 — Into the Mountains', activities: [
+          { e: '🚌', t: 'Volvo from Delhi — 14 hours, but the Beas river views: priceless' },
+          { e: '🏔️', t: 'Arrive Manali, check in, feel the cold slap of altitude' },
+          { e: '🍲', t: 'Himachali dham: madra, kaddu, and sepu badi at a local dhaba' },
+          { e: '⭐', t: 'Stars so bright you\'ll cry a little. It\'s fine.' }
+        ]},
+        { label: 'Day 2 — Peak Performance', activities: [
+          { e: '❄️', t: 'Rohtang Pass trek — snow in June, lose your mind' },
+          { e: '🧊', t: 'Icy river crossing (with guide, obviously)' },
+          { e: '☕', t: 'Maggi and chai at a mountain stall — perfection exists' },
+          { e: '🌄', t: 'Old Manali village at dusk: apple orchards and silence' }
+        ]},
+        { label: 'Day 3 — Descend & Reflect', activities: [
+          { e: '🛕', t: 'Hadimba Devi Temple — ancient deodar forest, sacred calm' },
+          { e: '🛍️', t: 'Mall Road for Tibetan handicrafts and woollens' },
+          { e: '♨️', t: 'Vashisht hot springs — volcanic warmth under open sky' },
+          { e: '🚌', t: 'Board the overnight bus back. Carry the mountains in you.' }
+        ]}
+      ],
+      addons: [
+        { name: '🎿 Solang Skiing Session', price: 1200 },
+        { name: '🪂 Paragliding Bir Billing', price: 2500 },
+        { name: '🏍️ Spiti Valley Bike Trip', price: 4500 },
+        { name: '🧗 Rock Climbing', price: 800 }
+      ]
+    },
+    tokyo: {
+      name: 'Tokyo',
+      emoji: '🌸',
+      sub: 'Cherry blossoms, ramen & controlled chaos',
+      bgClass: 'bg-tokyo',
+      headerGradient: 'linear-gradient(135deg, #fd79a844 0%, #fdcb6e33 100%)',
+      code: 'NRT',
+      days: [
+        { label: 'Day 1 — Sensory Overload (Joyful)', activities: [
+          { e: '✈️', t: 'Narita Express into Shinjuku — welcome to the future' },
+          { e: '🏮', t: 'Sensoji Temple in Asakusa at golden hour' },
+          { e: '🍜', t: 'Ramen at a hole-in-the-wall, 11pm, still a queue' },
+          { e: '🌃', t: 'Shibuya Crossing — stand in the center and feel alive' }
+        ]},
+        { label: 'Day 2 — Culture & Chaos', activities: [
+          { e: '🌸', t: 'Ueno Park cherry blossoms (season permitting — check dates)' },
+          { e: '🎮', t: 'Akihabara electronics & anime district — 3 hours minimum' },
+          { e: '🍣', t: 'Tsukiji outer market breakfast: the freshest tuna you\'ll ever have' },
+          { e: '🗼', t: 'Tokyo Tower at night — lights across the endless city' }
+        ]},
+        { label: 'Day 3 — Quiet Tokyo', activities: [
+          { e: '⛩️', t: 'Meiji Shrine at dawn — total silence, unexpected peace' },
+          { e: '☕', t: 'Kissaten (old-school coffee shop): jazz, pour-over, time stops' },
+          { e: '🛍️', t: 'Harajuku Takeshita Street and Omotesando for design lovers' },
+          { e: '✈️', t: 'Board the flight home. Promise yourself you\'ll return.' }
+        ]}
+      ],
+      addons: [
+        { name: '🍣 Sushi Making Class', price: 2200 },
+        { name: '⛩️ Kyoto Day Trip', price: 3500 },
+        { name: '🎌 Tea Ceremony', price: 1100 },
+        { name: '🗻 Mt. Fuji Hike', price: 2800 }
+      ]
+    },
+    maldives: {
+      name: 'Maldives',
+      emoji: '🐠',
+      sub: 'Overwater villas & impossible turquoise',
+      bgClass: 'bg-maldives',
+      headerGradient: 'linear-gradient(135deg, #00cec944 0%, #74b9ff33 100%)',
+      code: 'MLE',
+      days: [
+        { label: 'Day 1 — Touchdown on Paradise', activities: [
+          { e: '🛥️', t: 'Speedboat transfer to your island — ocean so clear it\'s surreal' },
+          { e: '🏖️', t: 'Check into overwater bungalow — glass floor over the lagoon' },
+          { e: '🐠', t: 'Snorkel straight from your deck — neon fish, coral cathedrals' },
+          { e: '🌅', t: 'Sunset from your private plunge pool. Just you and the horizon.' }
+        ]},
+        { label: 'Day 2 — Ocean Everything', activities: [
+          { e: '🦈', t: 'Whale shark swimming tour — harmless giants of the deep' },
+          { e: '🤿', t: 'Scuba dive on the outer reef — visibility: 30m, beauty: infinite' },
+          { e: '🏝️', t: 'Uninhabited island picnic with fresh coconuts' },
+          { e: '⭐', t: 'Bioluminescent beach at night — the sea glows blue beneath you' }
+        ]},
+        { label: 'Day 3 — Slow Ocean Time', activities: [
+          { e: '🧘', t: 'Sunrise yoga on a floating platform — sea breeze, salt air' },
+          { e: '💆', t: 'Couples spa with signature coconut oil treatment' },
+          { e: '🐢', t: 'Sea turtle conservation experience — release a baby turtle' },
+          { e: '✈️', t: 'Fly out. The Indian Ocean will feel like a heartbreak.' }
+        ]}
+      ],
+      addons: [
+        { name: '🦈 Whale Shark Tour', price: 4500 },
+        { name: '🤿 Sunset Dive', price: 3200 },
+        { name: '🚤 Island Hopping', price: 2800 },
+        { name: '🐢 Turtle Conservation', price: 1800 }
+      ]
+    }
+  };
+
+  const flights = [
+    {
+      airline: 'IndiGo',
+      code: '6E-201',
+      logoClass: 'indigo',
+      logoText: '6E',
+      dep: '06:20',
+      arr: '08:35',
+      duration: '2h 15m',
+      stops: 'Non-stop',
+      price: 4299,
+      badge: '⭐ Best Value',
+      tag: 'On-time performer'
+    },
+    {
+      airline: 'Air India',
+      code: 'AI-102',
+      logoClass: 'airindia',
+      logoText: 'AI',
+      dep: '10:45',
+      arr: '13:15',
+      duration: '2h 30m',
+      stops: 'Non-stop',
+      price: 5899,
+      badge: null,
+      tag: 'Full meals included'
+    },
+    {
+      airline: 'SpiceJet',
+      code: 'SG-808',
+      logoClass: 'spicejet',
+      logoText: 'SJ',
+      dep: '05:00',
+      arr: '09:15',
+      duration: '4h 15m',
+      stops: '1 stop · Hyderabad',
+      price: 3799,
+      badge: '💰 Cheapest',
+      tag: 'Budget pick'
+    }
+  ];
+
+  const hotels = [
+    {
+      name: 'The Sunset Resort',
+      stars: '⭐⭐⭐⭐⭐',
+      desc: 'Ocean view rooms, infinity pool, breakfast included',
+      price: 8500,
+      bgClass: 'goa-sunset',
+      amenities: ['🌊 Ocean View', '🏊 Infinity Pool', '🍳 Breakfast', '💆 Spa', '🏋️ Gym'],
+      review: '4.9 · 1,240 reviews',
+      photoGradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 40%, #f093fb 100%)'
+    },
+    {
+      name: "Backpacker's Paradise",
+      stars: '⭐⭐',
+      desc: 'Social hostel, beachside, free WiFi & vibes',
+      price: 1200,
+      amenities: ['🌊 Beach Access', '📶 Free WiFi', '🎮 Lounge', '🍺 Bar', '🛵 Rentals'],
+      review: '4.4 · 880 reviews',
+      photoGradient: 'linear-gradient(135deg, #f7971e 0%, #ffd200 60%, #ffab40 100%)'
+    },
+    {
+      name: 'Airbnb — Beachfront Villa',
+      stars: '⭐⭐⭐⭐',
+      desc: 'Private villa, scenic deck, entire place yours',
+      price: 4200,
+      amenities: ['🏠 Entire Place', '🌅 Private Deck', '🚿 Hot Tub', '🍳 Kitchen', '🔑 Self Check-in'],
+      review: '4.8 · 312 reviews',
+      photoGradient: 'linear-gradient(135deg, #43cea2 0%, #185a9d 60%, #00cec9 100%)'
+    }
+  ];
+
+  // ── INIT ──
+  function init() {
+    const today = new Date();
+    today.setDate(today.getDate() + 7);
+    document.getElementById('travelDate').value = today.toISOString().split('T')[0];
+  }
+
+  // ── DESTINATION CHANGE ──
+  function handleDestChange() {
+    const val = document.getElementById('destSelect').value;
+    if (!val) return;
+
+    const dest = destinations[val];
+    const hero = document.getElementById('destHero');
+    const header = document.getElementById('mainHeader');
+
+    document.getElementById('destEmoji').textContent = dest.emoji;
+    document.getElementById('destName').textContent = dest.name;
+    document.getElementById('destSub').textContent = dest.sub;
+    hero.classList.add('visible');
+
+    // Update header background tint
+    header.style.setProperty('--dest-overlay', dest.headerGradient);
+  }
+
+  // ── SEARCH FLIGHTS ──
+  function searchFlights() {
+    const val = document.getElementById('destSelect').value;
+    if (!val) {
+      showToast('Please select a destination first! ✈️');
+      return;
+    }
+
+    state.destination = val;
+
+    // Show steps
+    document.getElementById('stepsBar').style.display = 'flex';
+
+    // Show searching
+    showSection('searchingSection');
+
+    // Simulate search delay
+    setTimeout(() => {
+      renderFlights();
+      showSection('flightSection');
+    }, 1400);
+  }
+
+  // ── RENDER FLIGHTS ──
+  function renderFlights() {
+    const dest = destinations[state.destination];
+    document.getElementById('flightSectionTitle').textContent =
+      `Flights to ${dest.name} ${dest.emoji}`;
+
+    const container = document.getElementById('flightCards');
+    container.innerHTML = flights.map((f, i) => `
+      <div class="flight-card" id="fcard-${i}" onclick="selectFlight(${i})">
+        ${f.badge ? `<div class="flight-badge">${f.badge}</div>` : ''}
+        <div class="flight-top">
+          <div class="airline-info">
+            <div class="airline-logo ${f.logoClass}">${f.logoText}</div>
+            <div>
+              <div class="airline-name">${f.airline}</div>
+              <div class="airline-code">${f.code}</div>
+            </div>
+          </div>
+          <div class="flight-price">
+            <div class="price-amount">₹${f.price.toLocaleString('en-IN')}</div>
+            <div class="price-label">per person</div>
+          </div>
+        </div>
+        <div class="flight-route">
+          <div>
+            <div class="route-time">${f.dep}</div>
+            <div class="route-city">DEL</div>
+          </div>
+          <div class="route-mid">
+            <div class="route-duration">${f.duration}</div>
+            <div class="route-line"><div class="route-dot"></div></div>
+            <div class="route-stop">${f.stops}</div>
+          </div>
+          <div class="flight-right">
+            <div class="route-time">${f.arr}</div>
+            <div class="route-city">${dest.code}</div>
+          </div>
+        </div>
+        <div class="flight-bottom">
+          <span class="flight-tag">${f.tag}</span>
+          <button class="btn-select" id="fselect-${i}" onclick="event.stopPropagation(); selectFlight(${i})">
+            Select ₹${f.price.toLocaleString('en-IN')}
+          </button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ── SELECT FLIGHT ──
+  function selectFlight(idx) {
+    state.flight = flights[idx];
+
+    // Update cards
+    document.querySelectorAll('.flight-card').forEach((c, i) => {
+      c.classList.toggle('selected', i === idx);
+      const btn = document.getElementById(`fselect-${i}`);
+      if (i === idx) {
+        btn.textContent = '✓ Selected';
+        btn.classList.add('selected-btn');
+      } else {
+        btn.textContent = `Select ₹${flights[i].price.toLocaleString('en-IN')}`;
+        btn.classList.remove('selected-btn');
+      }
+    });
+
+    setStep(2);
+    showToast(`${state.flight.airline} ${state.flight.code} selected! Now pick a hotel.`);
+
+    setTimeout(() => {
+      renderHotels();
+      showSection('hotelSection');
+      document.getElementById('hotelSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 400);
+  }
+
+  // ── RENDER HOTELS ──
+  function renderHotels() {
+    const dest = destinations[state.destination];
+    const container = document.getElementById('hotelCards');
+    container.innerHTML = hotels.map((h, i) => `
+      <div class="hotel-card" id="hcard-${i}" onclick="selectHotel(${i})">
+        <div class="hotel-photo" style="background: ${h.photoGradient}">
+          <span class="hotel-photo-rating">${h.stars}</span>
+        </div>
+        <div class="hotel-body">
+          <div class="hotel-top">
+            <div>
+              <div class="hotel-name">${h.name}</div>
+              <div class="hotel-desc">${h.desc}</div>
+            </div>
+            <div class="hotel-price-block">
+              <div class="hotel-price">₹${h.price.toLocaleString('en-IN')}</div>
+              <div class="hotel-per">/night</div>
+            </div>
+          </div>
+          <div class="amenity-pills">
+            ${h.amenities.map(a => `<span class="pill">${a}</span>`).join('')}
+          </div>
+          <div class="hotel-footer">
+            <span class="hotel-review">⭐ ${h.review}</span>
+            <button class="btn-book-hotel" id="hbtn-${i}" onclick="event.stopPropagation(); selectHotel(${i})">
+              Book Room
+            </button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ── SELECT HOTEL ──
+  function selectHotel(idx) {
+    state.hotel = hotels[idx];
+
+    document.querySelectorAll('.hotel-card').forEach((c, i) => {
+      c.classList.toggle('selected', i === idx);
+      const btn = document.getElementById(`hbtn-${i}`);
+      if (i === idx) {
+        btn.textContent = '✓ Booked';
+        btn.classList.add('booked');
+      } else {
+        btn.textContent = 'Book Room';
+        btn.classList.remove('booked');
+      }
+    });
+
+    setStep(3);
+    showToast(`${state.hotel.name} selected! Building your itinerary...`);
+
+    setTimeout(() => {
+      buildItinerary();
+      showSection('itinerarySection');
+      document.getElementById('itinerarySection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 400);
+  }
+
+  // ── BUILD ITINERARY ──
+  function buildItinerary() {
+    const dest = destinations[state.destination];
+    const nights = 7;
+    const flightCost = state.flight.price;
+    const hotelCost = state.hotel.price * nights;
+    state.total = flightCost + hotelCost;
+    state.addonTotal = 0;
+    state.addons = [];
+
+    document.getElementById('itin-dest-title').textContent = `7 Days in ${dest.name} ${dest.emoji}`;
+    document.getElementById('itin-flight').textContent =
+      `${state.flight.airline} ${state.flight.code} — ₹${flightCost.toLocaleString('en-IN')}`;
+    document.getElementById('itin-hotel').textContent =
+      `${state.hotel.name} × 7 nights — ₹${hotelCost.toLocaleString('en-IN')}`;
+    updateTotal();
+
+    // Days
+    const dayContainer = document.getElementById('dayBlocks');
+    dayContainer.innerHTML = dest.days.map(d => `
+      <div class="day-block">
+        <div class="day-label">${d.label}</div>
+        <div class="day-activities">
+          ${d.activities.map(a => `
+            <div class="activity-item">
+              <span class="activity-emoji">${a.e}</span>
+              <span>${a.t}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `).join('');
+
+    // Addons
+    const addonContainer = document.getElementById('addonsList');
+    addonContainer.innerHTML = dest.addons.map((a, i) => `
+      <div class="addon-item">
+        <div class="addon-info">
+          <div class="addon-name">${a.name}</div>
+          <div class="addon-price">₹${a.price.toLocaleString('en-IN')} per person</div>
+        </div>
+        <button class="btn-addon" id="addon-${i}" onclick="toggleAddon(${i}, ${a.price}, '${a.name}')">
+          + Add
+        </button>
+      </div>
+    `).join('');
+  }
+
+  // ── TOGGLE ADDON ──
+  function toggleAddon(idx, price, name) {
+    const btn = document.getElementById(`addon-${idx}`);
+    const already = state.addons.includes(idx);
+
+    if (already) {
+      state.addons = state.addons.filter(i => i !== idx);
+      state.addonTotal -= price;
+      btn.textContent = '+ Add';
+      btn.classList.remove('added');
+    } else {
+      state.addons.push(idx);
+      state.addonTotal += price;
+      btn.textContent = '✓ Added';
+      btn.classList.add('added');
+    }
+
+    state.total = state.flight.price + (state.hotel.price * 7) + state.addonTotal;
+    updateTotal();
+  }
+
+  // ── UPDATE TOTAL ──
+  function updateTotal() {
+    document.getElementById('itin-total').textContent = `₹${state.total.toLocaleString('en-IN')}`;
+    document.getElementById('bookAllBtn').innerHTML =
+      `Book Everything — <span id="bookBtnTotal">₹${state.total.toLocaleString('en-IN')}</span>`;
+    document.getElementById('modalPayAmount').textContent = `₹${state.total.toLocaleString('en-IN')}`;
+  }
+
+  // ── TOGGLE ADDONS PANEL ──
+  function toggleAddons(el) {
+    el.classList.toggle('open');
+    document.getElementById('addonsPanel').classList.toggle('open');
+  }
+
+  // ── OPEN PAYMENT ──
+  function openPayment() {
+    document.getElementById('modalPayAmount').textContent = `₹${state.total.toLocaleString('en-IN')}`;
+    document.getElementById('paymentModal').classList.add('active');
+    document.getElementById('paymentForm').style.display = 'block';
+    document.getElementById('processingScreen').classList.remove('active');
+  }
+
+  // ── PROCESS PAYMENT ──
+  function processPayment() {
+    document.getElementById('paymentForm').style.display = 'none';
+    document.getElementById('processingScreen').classList.add('active');
+
+    const messages = [
+      'Booking your flight...',
+      'Reserving your room...',
+      'Packing your bags virtually...',
+      'Convincing the universe...',
+      'Almost there...'
+    ];
+
+    let i = 0;
+    const interval = setInterval(() => {
+      if (i < messages.length) {
+        document.getElementById('processingText').textContent = messages[i++];
+      } else {
+        clearInterval(interval);
+        document.getElementById('paymentModal').classList.remove('active');
+        showConfirmation();
+      }
+    }, 600);
+  }
+
+  // ── SHOW CONFIRMATION ──
+  function showConfirmation() {
+    const dest = destinations[state.destination];
+    const code = dest.name.toUpperCase().slice(0, 3);
+    const id = `#DREAM2025-${code}-7DAYS`;
+
+    document.getElementById('bookingId').textContent = id;
+    document.getElementById('conf-dest').textContent = `${dest.name} ${dest.emoji}`;
+    document.getElementById('conf-flight').textContent = `${state.flight.airline} ${state.flight.code}`;
+    document.getElementById('conf-hotel').textContent = state.hotel.name;
+    document.getElementById('conf-total').textContent = `₹${state.total.toLocaleString('en-IN')}`;
+
+    // Resignation email body
+    document.getElementById('resignBody').innerHTML = `
+      Dear [Boss Name],<br><br>
+      I have booked a one-way ticket to ${dest.name}.<br>
+      It has been a genuine pleasure working here.<br>
+      I wish the team all the best.<br><br>
+      Warm regards,<br>
+      [Your Name]<br><br>
+      P.S. Please water the office plant. 🪴
+    `;
+
+    setStep(4);
+    showSection('confirmSection');
+
+    setTimeout(() => {
+      document.getElementById('confirmSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 200);
+
+    launchConfetti();
+  }
+
+  // ── CONFETTI ──
+  function launchConfetti() {
+    const wrapper = document.getElementById('confettiWrapper');
+    const colors = ['#ff6b00', '#ffb800', '#003580', '#10b981', '#fd79a8', '#74b9ff', '#feca57'];
+
+    for (let i = 0; i < 80; i++) {
+      const piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      piece.style.cssText = `
+        left: ${Math.random() * 100}%;
+        background: ${colors[Math.floor(Math.random() * colors.length)]};
+        width: ${6 + Math.random() * 8}px;
+        height: ${6 + Math.random() * 8}px;
+        animation-duration: ${2 + Math.random() * 3}s;
+        animation-delay: ${Math.random() * 1.5}s;
+        border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
+      `;
+      wrapper.appendChild(piece);
+    }
+
+    setTimeout(() => { wrapper.innerHTML = ''; }, 6000);
+  }
+
+  // ── SHARE ──
+  function shareEscape() {
+    const dest = destinations[state.destination];
+    const text = `I almost moved to ${dest.name}. ₹${state.total.toLocaleString('en-IN')} itinerary, fully planned, zero executed. ${dest.emoji} #OneWayTicket #Daydream`;
+
+    const box = document.getElementById('shareTextBox');
+    box.textContent = text;
+    box.classList.toggle('visible');
+
+    if (box.classList.contains('visible')) {
+      // Try clipboard
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('Copied to clipboard! Paste it anywhere. 📋');
+      }).catch(() => {});
+    }
+  }
+
+  // ── OPEN RESIGNATION ──
+  function openResignation() {
+    const composer = document.getElementById('emailComposer');
+    composer.classList.add('visible');
+    document.querySelector('.btn-resign').style.display = 'none';
+    composer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // ── SEND RESIGNATION ──
+  function sendResignation() {
+    const overlay = document.getElementById('emailFlyOverlay');
+    overlay.classList.add('active');
+
+    // After animation, replace with safe message
+    setTimeout(() => {
+      document.getElementById('flyText').style.opacity = '1';
+    }, 1200);
+
+    setTimeout(() => {
+      overlay.classList.remove('active');
+      const composer = document.getElementById('emailComposer');
+      composer.innerHTML = `
+        <div style="text-align:center; padding:24px; background:linear-gradient(135deg,#e8f5e9,#c8e6c9); border-radius:12px; color:#2e7d32;">
+          <div style="font-size:36px; margin-bottom:10px;">😌</div>
+          <div style="font-size:15px; font-weight:700; margin-bottom:6px;">Email disintegrated mid-flight.</div>
+          <div style="font-size:13px; opacity:0.85; line-height:1.6;">
+            Your job is safe. For now.<br>
+            <em>The universe decided you need more practice runs first.</em>
+          </div>
+        </div>
+      `;
+    }, 3500);
+  }
+
+  // ── SECTION HELPERS ──
+  function showSection(id) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('visible'));
+    // Keep all previously visible sections except searching
+    const order = ['searchingSection', 'flightSection', 'hotelSection', 'itinerarySection', 'confirmSection'];
+    const target = order.indexOf(id);
+
+    if (id === 'searchingSection') {
+      document.getElementById('searchingSection').classList.add('visible');
+      return;
+    }
+
+    // Show all sections up to target
+    order.forEach((sid, i) => {
+      if (i > 0 && i <= target) {
+        document.getElementById(sid).classList.add('visible');
+      }
+    });
+  }
+
+  function setStep(n) {
+    for (let i = 1; i <= 4; i++) {
+      const el = document.getElementById(`step${i}`);
+      if (i < n) el.className = 'step-item done';
+      else if (i === n) el.className = 'step-item active';
+      else el.className = 'step-item';
+    }
+  }
+
+  // ── TOAST ──
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  // ── START ──
+  init();
+</script>
+</body>
+</html>

@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inbox Zero</title>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --gmail-red: #EA4335;
+    --gmail-red-dark: #C5221F;
+    --jira-blue: #0052CC;
+    --jira-blue-dark: #0747A6;
+    --green-progress: #1A7F37;
+    --green-fill: #00C851;
+    --bg: #F6F8FC;
+    --card-bg: #FFFFFF;
+    --border: #E0E0E0;
+    --text-primary: #202124;
+    --text-secondary: #5F6368;
+    --text-sender: #202124;
+    --unread-bg: #FFFFFF;
+    --read-bg: #F2F6FC;
+    --shadow: 0 1px 2px rgba(60,64,67,0.3), 0 1px 3px rgba(60,64,67,0.15);
+    --shadow-hover: 0 1px 3px rgba(60,64,67,0.3), 0 4px 8px rgba(60,64,67,0.15);
+  }
+
+  body {
+    font-family: 'Roboto', Arial, sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0;
+  }
+
+  #app {
+    width: 100%;
+    max-width: 640px;
+    min-height: 100vh;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  /* ===== HEADER ===== */
+  #header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--gmail-red);
+    transition: background 0.3s ease;
+  }
+  body.jira-mode #header { background: var(--jira-blue); }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    color: white;
+  }
+
+  .header-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 20px;
+    font-weight: 500;
+    font-family: 'Google Sans', sans-serif;
+    letter-spacing: -0.3px;
+  }
+  .header-logo .logo-icon {
+    width: 28px;
+    height: 28px;
+    background: white;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--gmail-red);
+    transition: color 0.3s;
+  }
+  body.jira-mode .header-logo .logo-icon { color: var(--jira-blue); }
+
+  .mode-toggle {
+    display: flex;
+    background: rgba(255,255,255,0.2);
+    border-radius: 20px;
+    padding: 2px;
+    gap: 2px;
+  }
+  .mode-btn {
+    border: none;
+    background: transparent;
+    color: rgba(255,255,255,0.75);
+    padding: 5px 12px;
+    border-radius: 18px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    font-family: 'Google Sans', sans-serif;
+    transition: all 0.2s;
+    letter-spacing: 0.3px;
+  }
+  .mode-btn.active {
+    background: white;
+    color: var(--gmail-red);
+    font-weight: 700;
+  }
+  body.jira-mode .mode-btn.active { color: var(--jira-blue); }
+
+  /* Counter area */
+  .header-counter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px 6px;
+    color: white;
+  }
+  .unread-count {
+    font-size: 14px;
+    font-weight: 500;
+    font-family: 'Google Sans', sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .count-number {
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1;
+    font-family: 'Google Sans', sans-serif;
+    transition: transform 0.15s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .count-number.pop {
+    animation: countPop 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes countPop {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.35); }
+    100% { transform: scale(1); }
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .btn-archive-all {
+    background: rgba(255,255,255,0.25);
+    border: 1px solid rgba(255,255,255,0.5);
+    color: white;
+    padding: 6px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: 'Google Sans', sans-serif;
+    transition: background 0.15s, transform 0.1s;
+    white-space: nowrap;
+  }
+  .btn-archive-all:hover { background: rgba(255,255,255,0.35); }
+  .btn-archive-all:active { transform: scale(0.97); }
+  .btn-restart {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.4);
+    color: rgba(255,255,255,0.85);
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-family: 'Google Sans', sans-serif;
+    transition: all 0.15s;
+  }
+  .btn-restart:hover { background: rgba(255,255,255,0.15); }
+
+  /* Progress bar */
+  .progress-bar-container {
+    padding: 0 16px 10px;
+  }
+  .progress-track {
+    height: 4px;
+    background: rgba(255,255,255,0.25);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: white;
+    border-radius: 2px;
+    width: 0%;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s;
+  }
+  .progress-label {
+    margin-top: 5px;
+    font-size: 11px;
+    color: rgba(255,255,255,0.8);
+    font-family: 'Google Sans', sans-serif;
+    min-height: 16px;
+    transition: all 0.3s;
+    letter-spacing: 0.2px;
+  }
+
+  /* Keyboard hint */
+  .keyboard-hint {
+    text-align: center;
+    font-size: 11px;
+    color: rgba(255,255,255,0.65);
+    padding: 0 16px 8px;
+    font-family: 'Roboto', sans-serif;
+  }
+  .keyboard-hint kbd {
+    background: rgba(255,255,255,0.2);
+    border-radius: 3px;
+    padding: 1px 5px;
+    font-size: 11px;
+    font-family: monospace;
+    border: 1px solid rgba(255,255,255,0.35);
+  }
+
+  /* ===== INBOX LIST ===== */
+  #inbox-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+  }
+
+  .inbox-section-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    padding: 10px 16px 4px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-family: 'Roboto', sans-serif;
+  }
+
+  /* ===== EMAIL ITEM ===== */
+  .email-item {
+    background: var(--unread-bg);
+    border-bottom: 1px solid var(--border);
+    padding: 0;
+    display: flex;
+    align-items: stretch;
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.35s cubic-bezier(0.4,0,0.2,1),
+                opacity 0.35s ease,
+                max-height 0.35s cubic-bezier(0.4,0,0.2,1),
+                padding 0.35s ease;
+    max-height: 80px;
+    transform-origin: left center;
+  }
+  .email-item.is-read {
+    background: var(--read-bg);
+  }
+  .email-item.is-read .sender { font-weight: 400; color: var(--text-secondary); }
+  .email-item.is-read .subject { font-weight: 400; color: var(--text-secondary); }
+
+  .email-item:hover {
+    box-shadow: var(--shadow-hover);
+    z-index: 1;
+  }
+
+  .email-item.archiving {
+    animation: slideOutRight 0.38s cubic-bezier(0.4,0,1,1) forwards;
+  }
+  @keyframes slideOutRight {
+    0% { transform: translateX(0); opacity: 1; max-height: 80px; }
+    60% { transform: translateX(110%); opacity: 0; max-height: 80px; }
+    100% { transform: translateX(110%); opacity: 0; max-height: 0; padding: 0; border: none; }
+  }
+
+  /* Swipe reveal background */
+  .swipe-bg {
+    position: absolute;
+    right: 0; top: 0; bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 20px;
+    background: linear-gradient(to right, transparent, #1A7F37);
+    color: white;
+    font-size: 18px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+    width: 100%;
+  }
+
+  /* Checkbox area */
+  .email-check {
+    width: 48px;
+    min-width: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .check-circle {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    color: transparent;
+    background: white;
+    transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1);
+    flex-shrink: 0;
+  }
+  .email-item:hover .check-circle {
+    border-color: #999;
+    background: #F5F5F5;
+  }
+  .email-item.checked .check-circle {
+    background: #1A7F37;
+    border-color: #1A7F37;
+    color: white;
+    transform: scale(1.15);
+  }
+
+  /* Avatar */
+  .email-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 600;
+    color: white;
+    flex-shrink: 0;
+    margin: auto 0;
+    font-family: 'Google Sans', sans-serif;
+  }
+
+  /* Email body */
+  .email-body {
+    flex: 1;
+    min-width: 0;
+    padding: 10px 12px 10px 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+  }
+  .email-top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .sender {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--text-sender);
+    font-family: 'Google Sans', sans-serif;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    min-width: 0;
+  }
+  .email-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .email-time {
+    font-size: 12px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+  }
+  .label-important {
+    background: #F9AB00;
+    color: white;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 2px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .label-p0 {
+    background: #EA4335;
+    color: white;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 2px;
+    letter-spacing: 0.5px;
+  }
+  .label-p1 { background: #FA7B17; color: white; font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 2px; }
+  .label-p2 { background: #1A73E8; color: white; font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 2px; }
+  .subject {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .snippet {
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 300;
+  }
+  .snippet-sep { margin: 0 4px; }
+
+  /* Jira ticket styles */
+  .ticket-id {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--jira-blue);
+    font-family: monospace;
+    letter-spacing: 0.3px;
+  }
+  .ticket-type-icon {
+    width: 16px;
+    height: 16px;
+    border-radius: 2px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    color: white;
+    margin-right: 4px;
+    vertical-align: middle;
+    flex-shrink: 0;
+  }
+
+  /* ===== ZERO OVERLAY ===== */
+  #zero-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  #zero-overlay.show {
+    pointer-events: all;
+  }
+
+  .zero-circle {
+    position: absolute;
+    width: 0;
+    height: 0;
+    background: #00C851;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    top: 50%;
+    left: 50%;
+  }
+
+  .zero-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    color: white;
+    padding: 24px;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: opacity 0.4s ease 0.6s, transform 0.4s cubic-bezier(0.34,1.56,0.64,1) 0.6s;
+  }
+  #zero-overlay.show .zero-content {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .zero-icon {
+    font-size: 72px;
+    margin-bottom: 12px;
+    animation: zeroIconBounce 0.6s cubic-bezier(0.34,1.56,0.64,1) 0.8s both;
+  }
+  @keyframes zeroIconBounce {
+    from { transform: scale(0); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .zero-title {
+    font-size: 52px;
+    font-weight: 900;
+    font-family: 'Google Sans', sans-serif;
+    letter-spacing: -2px;
+    line-height: 1;
+    margin-bottom: 8px;
+    text-shadow: 0 2px 20px rgba(0,0,0,0.15);
+  }
+
+  .zero-subtitle {
+    font-size: 18px;
+    font-weight: 400;
+    opacity: 0.9;
+    margin-bottom: 6px;
+    font-family: 'Google Sans', sans-serif;
+  }
+
+  .zero-cleared {
+    font-size: 15px;
+    opacity: 0.75;
+    margin-bottom: 24px;
+    font-family: 'Roboto', sans-serif;
+  }
+
+  .zero-twist {
+    background: rgba(0,0,0,0.2);
+    border-radius: 12px;
+    padding: 16px 24px;
+    font-size: 16px;
+    font-family: 'Google Sans', sans-serif;
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.5s ease 2.2s, transform 0.5s ease 2.2s;
+    max-width: 340px;
+    line-height: 1.5;
+  }
+  #zero-overlay.show .zero-twist { opacity: 1; transform: translateY(0); }
+
+  .zero-btn-row {
+    margin-top: 20px;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.4s ease 3.2s;
+  }
+  #zero-overlay.show .zero-btn-row { opacity: 1; }
+
+  .zero-btn {
+    background: white;
+    color: #1A7F37;
+    border: none;
+    padding: 10px 22px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: 'Google Sans', sans-serif;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+  .zero-btn:hover { transform: scale(1.04); box-shadow: 0 4px 16px rgba(0,0,0,0.2); }
+
+  .zero-session-count {
+    margin-top: 28px;
+    font-size: 13px;
+    opacity: 0.7;
+    font-family: 'Roboto', sans-serif;
+  }
+
+  /* ===== CONFETTI ===== */
+  .confetti-piece {
+    position: fixed;
+    width: 8px;
+    height: 10px;
+    pointer-events: none;
+    z-index: 1001;
+    border-radius: 1px;
+    animation: confettiFall linear forwards;
+  }
+  @keyframes confettiFall {
+    0% { transform: translateY(-20px) rotate(0deg) scaleX(1); opacity: 1; }
+    80% { opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg) scaleX(-1); opacity: 0; }
+  }
+
+  /* ===== ARCHIVE ALL ANIMATION ===== */
+  @keyframes whooshAll {
+    0% { transform: translateX(0); opacity: 1; }
+    100% { transform: translateX(120%); opacity: 0; }
+  }
+
+  /* ===== MISC ===== */
+  .stat-bar {
+    background: white;
+    border-bottom: 1px solid var(--border);
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-family: 'Roboto', sans-serif;
+  }
+  .stat-bar strong { color: var(--text-primary); }
+
+  .empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--text-secondary);
+    display: none;
+  }
+  .empty-state .es-icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-state h3 { font-size: 18px; font-weight: 500; color: var(--text-primary); margin-bottom: 8px; }
+  .empty-state p { font-size: 14px; }
+
+  /* Swiping styles */
+  .email-item.swiping .swipe-bg { opacity: 1; }
+
+  /* scrollbar */
+  #inbox-list::-webkit-scrollbar { width: 6px; }
+  #inbox-list::-webkit-scrollbar-track { background: transparent; }
+  #inbox-list::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+  #inbox-list::-webkit-scrollbar-thumb:hover { background: #aaa; }
+
+  /* Jira mode overrides */
+  body.jira-mode .sender { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 13px; }
+  body.jira-mode .subject { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  body.jira-mode .email-avatar { border-radius: 4px; }
+  body.jira-mode .unread-bg { background: white; }
+  body.jira-mode .check-circle { border-radius: 3px; }
+
+  /* Archive flash */
+  @keyframes archiveFlash {
+    0% { background: rgba(26,127,55,0.12); }
+    100% { background: transparent; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HEADER -->
+  <div id="header">
+    <div class="header-top">
+      <div class="header-logo">
+        <div class="logo-icon" id="logo-icon">M</div>
+        <span id="logo-text">Gmail</span>
+      </div>
+      <div class="mode-toggle">
+        <button class="mode-btn active" id="btn-gmail" onclick="setMode('gmail')">Gmail</button>
+        <button class="mode-btn" id="btn-jira" onclick="setMode('jira')">Jira</button>
+      </div>
+    </div>
+
+    <div class="header-counter">
+      <div class="unread-count">
+        <span class="count-number" id="count-display">47</span>
+        <span id="count-label">unread</span>
+      </div>
+      <div class="header-actions">
+        <button class="btn-restart" onclick="restartInbox()">↺ Start over</button>
+        <button class="btn-archive-all" onclick="archiveAll()">Archive all</button>
+      </div>
+    </div>
+
+    <div class="progress-bar-container">
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+      <div class="progress-label" id="progress-label"></div>
+    </div>
+
+    <div class="keyboard-hint">
+      <kbd>E</kbd> archive selected &nbsp;·&nbsp; click item to select &nbsp;·&nbsp; drag to archive
+    </div>
+  </div>
+
+  <!-- STAT BAR -->
+  <div class="stat-bar" id="stat-bar">
+    <span>Inbox</span>
+    <span id="session-stat">Inbox zero achieved <strong>0</strong> times today</span>
+  </div>
+
+  <!-- INBOX LIST -->
+  <div id="inbox-list">
+    <!-- populated by JS -->
+  </div>
+
+  <!-- EMPTY STATE (before zero fires) -->
+  <div class="empty-state" id="empty-state">
+    <div class="es-icon">📭</div>
+    <h3>Loading your inbox...</h3>
+  </div>
+</div>
+
+<!-- INBOX ZERO OVERLAY -->
+<div id="zero-overlay">
+  <div class="zero-circle" id="zero-circle"></div>
+  <div class="zero-content">
+    <div class="zero-icon">✅</div>
+    <div class="zero-title">INBOX ZERO</div>
+    <div class="zero-subtitle" id="zero-subtitle">You actually did it.</div>
+    <div class="zero-cleared" id="zero-cleared">You cleared 47 fake tasks.</div>
+    <div class="zero-twist" id="zero-twist">
+      Your real inbox still has <strong>1,203 unread.</strong> 🙂
+    </div>
+    <div class="zero-btn-row">
+      <button class="zero-btn" onclick="restartFromZero()">Do it again</button>
+    </div>
+    <div class="zero-session-count" id="zero-session-count"></div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// DATA
+// ─────────────────────────────────────────────
+
+const GMAIL_ITEMS = [
+  { sender: "LinkedIn",        subject: "You have 23 new connection requests",       snippet: "People you may know are waiting...",       time: "9:41 AM",  avatar: "in", color: "#0A66C2", important: false },
+  { sender: "Amazon",          subject: "Your order has shipped 📦",                  snippet: "Estimated delivery: Tomorrow by 8 PM",    time: "8:15 AM",  avatar: "A",  color: "#FF9900", important: false },
+  { sender: "Boss",            subject: "Quick sync?",                                snippet: "Got 15 mins today? Need to loop you in.", time: "10:02 AM", avatar: "B",  color: "#4285F4", important: true },
+  { sender: "HR",              subject: "Mandatory training due Friday",              snippet: "Please complete by EOD Friday or else...", time: "Fri",      avatar: "HR", color: "#EA4335", important: true },
+  { sender: "Newsletter",      subject: "17 productivity hacks you won't use",       snippet: "Hack #4 will change your life (it won't)",  time: "Thu",      avatar: "N",  color: "#34A853", important: false },
+  { sender: "System Alert",    subject: "⚠️ Server memory at 89%",                    snippet: "Action required: prod-server-02 is hot",  time: "11:23 AM", avatar: "SA", color: "#EA4335", important: true },
+  { sender: "Slack",           subject: "You were mentioned 7 times while away",     snippet: "@you in #general, #eng, #random...",      time: "2:14 PM",  avatar: "S",  color: "#611F69", important: false },
+  { sender: "Google Calendar", subject: "3 events tomorrow",                         snippet: "Daily standup · Design review · 1:1",     time: "9:00 PM",  avatar: "G",  color: "#4285F4", important: false },
+  { sender: "Swiggy",          subject: "🍕 Flat 40% off, today only!",               snippet: "Use code HUNGRY40 at checkout",           time: "12:00 PM", avatar: "Sw", color: "#FC8019", important: false },
+  { sender: "Mom",             subject: "Call me when free",                         snippet: "Haven't heard from you in a while...",    time: "Tue",      avatar: "M",  color: "#E91E63", important: true },
+  { sender: "GitHub",          subject: "PR review requested",                       snippet: "feature/auth-refactor needs your eyes",   time: "3:47 PM",  avatar: "GH", color: "#24292E", important: false },
+  { sender: "Notion",          subject: "Weekly digest: 12 updates in your spaces",  snippet: "Q3 Roadmap was edited by 3 people",       time: "Mon",      avatar: "No", color: "#000000", important: false },
+  { sender: "Netflix",         subject: "New arrivals you'll love",                  snippet: "Based on your watch history (Shrek 2)",   time: "Mon",      avatar: "N",  color: "#E50914", important: false },
+  { sender: "PayPal",          subject: "You sent ₹3,499 to Zomato",                 snippet: "Transaction ID: 9X847291K · View details", time: "Sun",    avatar: "PP", color: "#003087", important: false },
+  { sender: "Twitter / X",     subject: "Someone liked your post from 2019",         snippet: "They liked 'why is my code not working'", time: "Sat",      avatar: "X",  color: "#000000", important: false },
+  { sender: "Figma",           subject: "You have 4 unread comments",                snippet: "'Can we make the button more blue?'",     time: "Fri",      avatar: "F",  color: "#F24E1E", important: false },
+  { sender: "Google Drive",    subject: "Document shared with you",                  snippet: "Q3 OKRs FINAL_v2_ACTUAL_FINAL.xlsx",     time: "Fri",      avatar: "GD", color: "#34A853", important: false },
+  { sender: "Zomato",          subject: "Rate your last order ⭐",                    snippet: "How was the Paneer Butter Masala?",       time: "Thu",      avatar: "Z",  color: "#E23744", important: false },
+  { sender: "Medium",          subject: "10 articles curated for you",               snippet: "You'll definitely read these this time",   time: "Thu",      avatar: "Me", color: "#000000", important: false },
+  { sender: "CTO",             subject: "Re: Architecture decision",                 snippet: "Let's go with option B — discuss tmrw",  time: "Wed",      avatar: "C",  color: "#5F6368", important: true },
+  { sender: "Google Ads",      subject: "Your campaign needs attention",             snippet: "CTR dropped 34% this week",               time: "Wed",      avatar: "GA", color: "#FBBC04", important: false },
+  { sender: "Jira",            subject: "16 issues assigned to you",                 snippet: "PROJ-204 is overdue · 3 P1 items open",  time: "Tue",      avatar: "Ji", color: "#0052CC", important: false },
+  { sender: "Coursera",        subject: "Continue your Python course",               snippet: "You're 73% done! Chapter 8: Pandas",     time: "Tue",      avatar: "Co", color: "#0056D2", important: false },
+  { sender: "Airbnb",          subject: "Don't forget! Trip in 3 days",              snippet: "Goa · Check-in Jul 4 · Host: Priya",     time: "Mon",      avatar: "Ab", color: "#FF5A5F", important: false },
+  { sender: "Teammate (Dev)",  subject: "Hey quick question about the API",          snippet: "Is the auth token supposed to expire?",  time: "11:09 AM", avatar: "T",  color: "#1A73E8", important: false },
+  { sender: "noreply@bank.com",subject: "Your statement is ready",                  snippet: "May 2025 · Click to view secured PDF",   time: "30 Jun",   avatar: "Ba", color: "#1A7F37", important: false },
+  { sender: "Leetcode",        subject: "You solved 0 problems this week",           snippet: "Your streak is in danger! 🔥 → 💀",       time: "Sun",      avatar: "L",  color: "#FFA116", important: false },
+  { sender: "Product Manager", subject: "Scope changes for Sprint 24",               snippet: "Just a few small tweaks (7 new reqs)",   time: "Fri",      avatar: "PM", color: "#9C27B0", important: true },
+  { sender: "Spotify",         subject: "New release from your top artist",          snippet: "Diljit Dosanjh just dropped 'GOAT 2'",   time: "Fri",      avatar: "Sp", color: "#1DB954", important: false },
+  { sender: "AWS",             subject: "Your monthly bill is ready",                snippet: "$0.47 charge on account 8821-****",      time: "1 Jul",    avatar: "AW", color: "#FF9900", important: false },
+  { sender: "Recruiter",       subject: "Exciting opportunity at FAANG company!",   snippet: "Your profile caught our attention...",    time: "Thu",      avatar: "R",  color: "#0A66C2", important: false },
+  { sender: "Vercel",          subject: "Deployment failed: main branch",            snippet: "Build error in 'dopamine-site' project", time: "2:38 PM",  avatar: "Ve", color: "#000000", important: true },
+  { sender: "Design Lead",     subject: "Figma handoff is ready for review",        snippet: "All specs updated, LGTM from my side",   time: "Wed",      avatar: "D",  color: "#F24E1E", important: false },
+  { sender: "Duolingo",        subject: "You haven't practiced in 47 days 🦉",       snippet: "Duo is... disappointed. But not mad.",   time: "Tue",      avatar: "Du", color: "#58CC02", important: false },
+  { sender: "Apple",           subject: "Your iCloud storage is almost full",        snippet: "14.6 GB of 15 GB used. Upgrade now.",   time: "Mon",      avatar: "Ap", color: "#555555", important: false },
+  { sender: "Colleague",       subject: "Can you cover standup tomorrow?",           snippet: "I have a dentist appointment at 10...",  time: "9:58 PM",  avatar: "Co", color: "#00897B", important: false },
+  { sender: "Noreply@linkedin",subject: "You appeared in 34 searches this week",    snippet: "Keep your profile updated for more...",  time: "Sun",      avatar: "in", color: "#0A66C2", important: false },
+  { sender: "Google Photos",   subject: "Memory: 2 years ago today",                snippet: "You were smiling. Look how young you were.", time: "Sat", avatar: "Ph", color: "#EA4335", important: false },
+  { sender: "Stack Overflow",  subject: "Your question got 3 downvotes",            snippet: "\"This doesn't show research effort\"",    time: "Sat",      avatar: "SO", color: "#F48024", important: false },
+  { sender: "ChatGPT",         subject: "Your weekly usage summary",                snippet: "You asked 'fix my code' 847 times",      time: "Fri",      avatar: "AI", color: "#10A37F", important: false },
+  { sender: "Mom (2nd email)", subject: "Did you eat?",                             snippet: "I made dal makhani. Call me.",            time: "Thu",      avatar: "M",  color: "#E91E63", important: true },
+  { sender: "Stripe",          subject: "New subscriber: someone@gmail.com",        snippet: "You earned $0.00 (after fees: -$0.30)",  time: "Wed",      avatar: "St", color: "#6772E5", important: false },
+  { sender: "Microsoft Teams", subject: "Missed call from your manager",            snippet: "They tried 3 times. No message left.",   time: "10:17 AM", avatar: "Te", color: "#5059C9", important: true },
+  { sender: "Git Bot",         subject: "CI/CD pipeline: 14 checks failed",        snippet: "See build logs for details (good luck)", time: "Tue",      avatar: "Gi", color: "#24292E", important: false },
+  { sender: "Yourself",        subject: "TODO: email yourself that idea",           snippet: "Actually write this down somewhere",     time: "Mon",      avatar: "Y",  color: "#FF6D00", important: false },
+  { sender: "Your Landlord",   subject: "Rent due tomorrow",                        snippet: "As discussed, by 10 AM please.",         time: "Yesterday",avatar: "LL", color: "#795548", important: true },
+  { sender: "Uber",            subject: "Receipt: ₹247 — Andheri to BKC",          snippet: "Trip on Jun 24 at 9:02 AM",              time: "Yesterday",avatar: "Ub", color: "#000000", important: false },
+];
+
+const JIRA_ITEMS = [
+  { id: "PROJ-234", summary: "Investigate prod issue — P0",                    type: "bug",    prio: "P0",  assignee: "You",      updated: "9:41 AM",  avatar: "Bu", color: "#EA4335" },
+  { id: "PROJ-235", summary: "Update API documentation for v2 endpoints",      type: "task",   prio: "P2",  assignee: "You",      updated: "8:30 AM",  avatar: "Do", color: "#1A73E8" },
+  { id: "PROJ-236", summary: "Code review for feature/auth-refactor",          type: "review", prio: "P1",  assignee: "You",      updated: "10:02 AM", avatar: "CR", color: "#FA7B17" },
+  { id: "PROJ-237", summary: "Sprint planning — Tomorrow 10 AM",               type: "event",  prio: "P2",  assignee: "Team",     updated: "Yesterday",avatar: "SP", color: "#0052CC" },
+  { id: "PROJ-238", summary: "Fix login timeout on mobile Safari",             type: "bug",    prio: "P1",  assignee: "You",      updated: "Fri",      avatar: "Bu", color: "#EA4335" },
+  { id: "PROJ-239", summary: "Implement dark mode toggle",                     type: "story",  prio: "P2",  assignee: "You",      updated: "Fri",      avatar: "DM", color: "#9C27B0" },
+  { id: "PROJ-240", summary: "DB migration script for users table",            type: "task",   prio: "P1",  assignee: "You",      updated: "Thu",      avatar: "DB", color: "#FA7B17" },
+  { id: "PROJ-241", summary: "Write unit tests for AuthService",               type: "task",   prio: "P2",  assignee: "You",      updated: "Thu",      avatar: "Te", color: "#1A73E8" },
+  { id: "PROJ-242", summary: "Update Figma components — design debt",          type: "task",   prio: "P3",  assignee: "Design",   updated: "Wed",      avatar: "Fi", color: "#34A853" },
+  { id: "PROJ-243", summary: "EPIC: Q3 Auth overhaul",                        type: "epic",   prio: "P1",  assignee: "You",      updated: "Wed",      avatar: "Ep", color: "#7B1FA2" },
+  { id: "PROJ-244", summary: "Memory leak in image upload handler",            type: "bug",    prio: "P0",  assignee: "You",      updated: "Tue",      avatar: "Bu", color: "#EA4335" },
+  { id: "PROJ-245", summary: "Onboarding flow — step 3 not saving",           type: "bug",    prio: "P1",  assignee: "You",      updated: "Tue",      avatar: "Bu", color: "#EA4335" },
+  { id: "PROJ-246", summary: "Set up staging environment",                     type: "task",   prio: "P2",  assignee: "DevOps",   updated: "Mon",      avatar: "SE", color: "#1A73E8" },
+  { id: "PROJ-247", summary: "Analytics integration — GA4 events",            type: "story",  prio: "P2",  assignee: "You",      updated: "Mon",      avatar: "An", color: "#FA7B17" },
+  { id: "PROJ-248", summary: "Rate limiting on public API",                    type: "task",   prio: "P1",  assignee: "You",      updated: "Sun",      avatar: "RL", color: "#FA7B17" },
+  { id: "PROJ-249", summary: "Accessibility audit — WCAG AA compliance",      type: "task",   prio: "P2",  assignee: "You",      updated: "Sun",      avatar: "Ac", color: "#1A73E8" },
+  { id: "PROJ-250", summary: "Redis cache eviction bug on high load",          type: "bug",    prio: "P1",  assignee: "You",      updated: "Sat",      avatar: "Bu", color: "#EA4335" },
+  { id: "PROJ-251", summary: "Product demo prep for investors",                type: "task",   prio: "P0",  assignee: "All",      updated: "Sat",      avatar: "De", color: "#34A853" },
+  { id: "PROJ-252", summary: "Refactor legacy payment module",                 type: "story",  prio: "P2",  assignee: "You",      updated: "Fri",      avatar: "Re", color: "#9C27B0" },
+  { id: "PROJ-253", summary: "Docker build times too slow (4 min+)",          type: "task",   prio: "P3",  assignee: "You",      updated: "Fri",      avatar: "Do", color: "#1A73E8" },
+  { id: "PROJ-254", summary: "Webhook retry logic not working",                type: "bug",    prio: "P1",  assignee: "You",      updated: "Thu",      avatar: "Bu", color: "#EA4335" },
+  { id: "PROJ-255", summary: "Customer reported: CSV export broken",          type: "bug",    prio: "P0",  assignee: "You",      updated: "Thu",      avatar: "Bu", color: "#EA4335" },
+  { id: "PROJ-256", summary: "Quarterly review document",                      type: "task",   prio: "P2",  assignee: "You",      updated: "Wed",      avatar: "QR", color: "#1A73E8" },
+  { id: "PROJ-257", summary: "Add Sentry error tracking to frontend",          type: "task",   prio: "P2",  assignee: "You",      updated: "Wed",      avatar: "Se", color: "#FA7B17" },
+  { id: "PROJ-258", summary: "Sprint retrospective notes",                     type: "task",   prio: "P3",  assignee: "Team",     updated: "Tue",      avatar: "SR", color: "#34A853" },
+  { id: "PROJ-259", summary: "Implement pagination for /users endpoint",       type: "story",  prio: "P2",  assignee: "You",      updated: "Tue",      avatar: "Pa", color: "#9C27B0" },
+  { id: "PROJ-260", summary: "Security audit findings — 3 high issues",       type: "bug",    prio: "P0",  assignee: "You",      updated: "Mon",      avatar: "Bu", color: "#EA4335" },
+  { id: "PROJ-261", summary: "TypeScript migration for utils/",               type: "task",   prio: "P3",  assignee: "You",      updated: "Mon",      avatar: "TS", color: "#3178C6" },
+  { id: "PROJ-262", summary: "Load test before launch",                        type: "task",   prio: "P1",  assignee: "You",      updated: "Sun",      avatar: "LT", color: "#FA7B17" },
+  { id: "PROJ-263", summary: "Mobile push notifications not delivering",       type: "bug",    prio: "P1",  assignee: "You",      updated: "Sun",      avatar: "Bu", color: "#EA4335" },
+  { id: "PROJ-264", summary: "Update privacy policy (legal req)",             type: "task",   prio: "P1",  assignee: "Legal",    updated: "Sat",      avatar: "Le", color: "#795548" },
+  { id: "PROJ-265", summary: "Feature: export to PDF",                        type: "story",  prio: "P2",  assignee: "You",      updated: "Sat",      avatar: "PD", color: "#9C27B0" },
+  { id: "PROJ-266", summary: "Investigate slow dashboard queries",             type: "task",   prio: "P1",  assignee: "You",      updated: "Fri",      avatar: "DB", color: "#FA7B17" },
+  { id: "PROJ-267", summary: "Add E2E tests for checkout flow",               type: "task",   prio: "P2",  assignee: "You",      updated: "Fri",      avatar: "E2", color: "#34A853" },
+  { id: "PROJ-268", summary: "Onboarding email sequence — copy review",       type: "task",   prio: "P3",  assignee: "Marketing",updated: "Thu",      avatar: "Em", color: "#1A73E8" },
+  { id: "PROJ-269", summary: "Fix broken images in Safari iOS 17",            type: "bug",    prio: "P1",  assignee: "You",      updated: "Thu",      avatar: "Bu", color: "#EA4335" },
+  { id: "PROJ-270", summary: "Candidate interviews — 3 slots to schedule",   type: "task",   prio: "P2",  assignee: "You",      updated: "Wed",      avatar: "In", color: "#0052CC" },
+  { id: "PROJ-271", summary: "Deprecate v1 API — communicate to users",       type: "task",   prio: "P2",  assignee: "You",      updated: "Wed",      avatar: "Dp", color: "#795548" },
+  { id: "PROJ-272", summary: "Add 2FA to admin panel",                        type: "story",  prio: "P0",  assignee: "You",      updated: "Tue",      avatar: "2F", color: "#EA4335" },
+  { id: "PROJ-273", summary: "Kubernetes pod restarts every 2h",              type: "bug",    prio: "P1",  assignee: "DevOps",   updated: "Tue",      avatar: "Bu", color: "#EA4335" },
+  { id: "PROJ-274", summary: "Write changelog for v2.4 release",              type: "task",   prio: "P3",  assignee: "You",      updated: "Mon",      avatar: "CL", color: "#34A853" },
+  { id: "PROJ-275", summary: "Resolve merge conflicts in feature/payments",   type: "task",   prio: "P1",  assignee: "You",      updated: "Mon",      avatar: "MG", color: "#FA7B17" },
+  { id: "PROJ-276", summary: "Performance regression in v2.3.1",              type: "bug",    prio: "P0",  assignee: "You",      updated: "Sun",      avatar: "Bu", color: "#EA4335" },
+  { id: "PROJ-277", summary: "Code cleanup: remove console.logs",             type: "task",   prio: "P3",  assignee: "You",      updated: "Sat",      avatar: "CC", color: "#5F6368" },
+  { id: "PROJ-278", summary: "Design review for Settings page",               type: "review", prio: "P2",  assignee: "You",      updated: "Sat",      avatar: "DR", color: "#F24E1E" },
+  { id: "PROJ-279", summary: "BLOCKED: Waiting for legal sign-off",          type: "task",   prio: "P1",  assignee: "You",      updated: "Fri",      avatar: "BL", color: "#795548" },
+  { id: "PROJ-280", summary: "Post-mortem: June 24 outage",                  type: "task",   prio: "P1",  assignee: "You",      updated: "Today",    avatar: "PM", color: "#EA4335" },
+];
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+const TOTAL = 47;
+let mode = 'gmail';
+let items = [];
+let archivedCount = 0;
+let selectedItem = null;
+let audioCtx = null;
+
+// localStorage counter
+let zeroCount = parseInt(localStorage.getItem('inboxZeroCount') || '0');
+
+// ─────────────────────────────────────────────
+// AUDIO
+// ─────────────────────────────────────────────
+function getAudio() {
+  if (!audioCtx) {
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
+  }
+  return audioCtx;
+}
+
+function playPop(pitch = 440, type = 'sine', duration = 0.08) {
+  const ctx = getAudio(); if (!ctx) return;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain); gain.connect(ctx.destination);
+  osc.type = type;
+  osc.frequency.setValueAtTime(pitch, ctx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(pitch * 1.4, ctx.currentTime + 0.03);
+  osc.frequency.exponentialRampToValueAtTime(pitch * 0.5, ctx.currentTime + duration);
+  gain.gain.setValueAtTime(0.18, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+  osc.start(ctx.currentTime);
+  osc.stop(ctx.currentTime + duration);
+}
+
+function playWhoosh() {
+  const ctx = getAudio(); if (!ctx) return;
+  const bufSize = ctx.sampleRate * 0.3;
+  const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < bufSize; i++) data[i] = (Math.random() * 2 - 1) * (1 - i/bufSize);
+  const src = ctx.createBufferSource();
+  const filt = ctx.createBiquadFilter();
+  const gain = ctx.createGain();
+  src.buffer = buf;
+  filt.type = 'bandpass'; filt.frequency.value = 600; filt.Q.value = 0.5;
+  src.connect(filt); filt.connect(gain); gain.connect(ctx.destination);
+  gain.gain.setValueAtTime(0.3, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+  src.start(); src.stop(ctx.currentTime + 0.3);
+}
+
+function playZeroThud() {
+  const ctx = getAudio(); if (!ctx) return;
+  // Deep thud
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain); gain.connect(ctx.destination);
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(80, ctx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.3);
+  gain.gain.setValueAtTime(0.6, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+  osc.start(ctx.currentTime);
+  osc.stop(ctx.currentTime + 0.5);
+  // High chime
+  setTimeout(() => {
+    const o2 = ctx.createOscillator();
+    const g2 = ctx.createGain();
+    o2.connect(g2); g2.connect(ctx.destination);
+    o2.type = 'sine'; o2.frequency.value = 880;
+    g2.gain.setValueAtTime(0.3, ctx.currentTime);
+    g2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
+    o2.start(); o2.stop(ctx.currentTime + 0.8);
+    const o3 = ctx.createOscillator();
+    const g3 = ctx.createGain();
+    o3.connect(g3); g3.connect(ctx.destination);
+    o3.type = 'sine'; o3.frequency.value = 1320;
+    g3.gain.setValueAtTime(0.2, ctx.currentTime + 0.15);
+    g3.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.9);
+    o3.start(ctx.currentTime + 0.15); o3.stop(ctx.currentTime + 0.9);
+  }, 100);
+}
+
+// ─────────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────────
+function getAvatarText(item) {
+  if (mode === 'jira') return item.avatar;
+  const s = item.sender;
+  if (s.includes('@')) return s[0].toUpperCase();
+  return s.substring(0, 2).toUpperCase();
+}
+
+function renderGmailItem(item, idx) {
+  const el = document.createElement('div');
+  el.className = 'email-item' + (item.read ? ' is-read' : '');
+  el.dataset.idx = idx;
+
+  const importantLabel = item.important ? `<span class="label-important">★ IMP</span>` : '';
+  const avatarText = getAvatarText(item);
+
+  el.innerHTML = `
+    <div class="swipe-bg"><span>✓ Archive</span></div>
+    <div class="email-check">
+      <div class="check-circle" onclick="toggleCheck(event, ${idx})">✓</div>
+    </div>
+    <div class="email-avatar" style="background:${item.color}">${avatarText}</div>
+    <div class="email-body">
+      <div class="email-top-row">
+        <span class="sender">${escHtml(item.sender)}</span>
+        <div class="email-meta">
+          ${importantLabel}
+          <span class="email-time">${item.time}</span>
+        </div>
+      </div>
+      <div class="subject">${escHtml(item.subject)}</div>
+      <div class="snippet">${escHtml(item.snippet)}</div>
+    </div>
+  `;
+
+  attachSwipe(el, idx);
+  el.addEventListener('click', (e) => {
+    if (e.target.closest('.check-circle')) return;
+    archiveSingle(idx);
+  });
+  return el;
+}
+
+function getJiraTypeIcon(type) {
+  const map = {
+    bug:    { bg: '#EA4335', icon: '🐛' },
+    task:   { bg: '#1A73E8', icon: '✓' },
+    story:  { bg: '#34A853', icon: '◆' },
+    epic:   { bg: '#9C27B0', icon: '⚡' },
+    review: { bg: '#FA7B17', icon: '◉' },
+    event:  { bg: '#0052CC', icon: '📅' },
+  };
+  return map[type] || map.task;
+}
+
+function getPrioLabel(prio) {
+  const cl = { P0: 'label-p0', P1: 'label-p1', P2: 'label-p2', P3: '' }[prio] || '';
+  return cl ? `<span class="${cl}">${prio}</span>` : '';
+}
+
+function renderJiraItem(item, idx) {
+  const el = document.createElement('div');
+  el.className = 'email-item' + (item.read ? ' is-read' : '');
+  el.dataset.idx = idx;
+
+  const typeInfo = getJiraTypeIcon(item.type);
+  const avatarText = item.avatar;
+  const prioLabel = getPrioLabel(item.prio);
+
+  el.innerHTML = `
+    <div class="swipe-bg"><span>✓ Done</span></div>
+    <div class="email-check">
+      <div class="check-circle" onclick="toggleCheck(event, ${idx})">✓</div>
+    </div>
+    <div class="email-avatar" style="background:${item.color}; border-radius:4px">${avatarText}</div>
+    <div class="email-body">
+      <div class="email-top-row">
+        <span class="sender" style="font-family:monospace;font-size:12px;color:#0052CC">${item.id}</span>
+        <div class="email-meta">
+          ${prioLabel}
+          <span class="email-time">${item.updated}</span>
+        </div>
+      </div>
+      <div class="subject">${escHtml(item.summary)}</div>
+      <div class="snippet">
+        <span style="display:inline-flex;align-items:center;gap:3px">
+          <span style="background:${typeInfo.bg};color:white;padding:0 4px;border-radius:2px;font-size:10px;font-weight:600">${item.type.toUpperCase()}</span>
+          <span>Assigned to: ${item.assignee}</span>
+        </span>
+      </div>
+    </div>
+  `;
+
+  attachSwipe(el, idx);
+  el.addEventListener('click', (e) => {
+    if (e.target.closest('.check-circle')) return;
+    archiveSingle(idx);
+  });
+  return el;
+}
+
+function renderInbox() {
+  const list = document.getElementById('inbox-list');
+  list.innerHTML = '';
+  const section = document.createElement('div');
+  section.className = 'inbox-section-label';
+  section.textContent = mode === 'gmail' ? 'Primary' : 'My Issues';
+  list.appendChild(section);
+
+  items.forEach((item, idx) => {
+    if (item.archived) return;
+    const el = mode === 'gmail' ? renderGmailItem(item, idx) : renderJiraItem(item, idx);
+    list.appendChild(el);
+  });
+
+  updateCounter();
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─────────────────────────────────────────────
+// SWIPE
+// ─────────────────────────────────────────────
+function attachSwipe(el, idx) {
+  let startX = null, curX = 0, dragging = false;
+  const THRESHOLD = 90;
+
+  function onDown(e) {
+    startX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+    dragging = false;
+    curX = 0;
+  }
+  function onMove(e) {
+    if (startX === null) return;
+    const x = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+    const dx = startX - x;
+    if (dx < 5) return;
+    dragging = true;
+    curX = dx;
+    el.style.transform = `translateX(${-dx}px)`;
+    const swipeBg = el.querySelector('.swipe-bg');
+    swipeBg.style.opacity = Math.min(dx / THRESHOLD, 1).toString();
+    if (e.type === 'touchmove') e.preventDefault();
+  }
+  function onUp() {
+    if (dragging && curX > THRESHOLD) {
+      el.style.transform = '';
+      archiveSingle(idx);
+    } else {
+      el.style.transform = '';
+      const swipeBg = el.querySelector('.swipe-bg');
+      if (swipeBg) swipeBg.style.opacity = '0';
+    }
+    startX = null; dragging = false; curX = 0;
+  }
+
+  el.addEventListener('mousedown', onDown);
+  el.addEventListener('mousemove', onMove);
+  el.addEventListener('mouseup', onUp);
+  el.addEventListener('mouseleave', onUp);
+  el.addEventListener('touchstart', onDown, { passive: true });
+  el.addEventListener('touchmove', onMove, { passive: false });
+  el.addEventListener('touchend', onUp);
+}
+
+// ─────────────────────────────────────────────
+// ARCHIVE LOGIC
+// ─────────────────────────────────────────────
+function archiveSingle(idx) {
+  if (items[idx].archived) return;
+  const el = document.querySelector(`.email-item[data-idx="${idx}"]`);
+  if (!el) return;
+
+  playPop(520 + Math.random() * 80, 'sine', 0.09);
+
+  items[idx].archived = true;
+  archivedCount++;
+
+  el.classList.add('archiving');
+  el.addEventListener('animationend', () => {
+    el.remove();
+    checkZero();
+  }, { once: true });
+
+  if (selectedItem === idx) selectedItem = null;
+  updateCounter();
+}
+
+function toggleCheck(e, idx) {
+  e.stopPropagation();
+  const el = document.querySelector(`.email-item[data-idx="${idx}"]`);
+  if (!el) return;
+  if (selectedItem === idx) {
+    el.classList.remove('checked');
+    selectedItem = null;
+  } else {
+    if (selectedItem !== null) {
+      const prev = document.querySelector(`.email-item[data-idx="${selectedItem}"]`);
+      if (prev) prev.classList.remove('checked');
+    }
+    el.classList.add('checked');
+    selectedItem = idx;
+    playPop(600, 'sine', 0.06);
+  }
+}
+
+function archiveAll() {
+  playWhoosh();
+  const els = document.querySelectorAll('.email-item:not(.archiving)');
+  let delay = 0;
+  els.forEach((el) => {
+    const idx = parseInt(el.dataset.idx);
+    setTimeout(() => {
+      if (items[idx] && !items[idx].archived) {
+        items[idx].archived = true;
+        archivedCount++;
+        el.style.animation = `whooshAll 0.35s cubic-bezier(0.4,0,1,1) ${delay * 0}ms forwards`;
+        el.style.animationFillMode = 'forwards';
+        el.style.opacity = '0';
+        el.style.maxHeight = '0';
+        el.style.overflow = 'hidden';
+        el.style.transition = 'max-height 0.3s ease, opacity 0.2s ease';
+        updateCounter();
+      }
+    }, delay * 30);
+    delay++;
+  });
+  setTimeout(() => {
+    document.querySelectorAll('.email-item').forEach(e => e.remove());
+    checkZero();
+  }, delay * 30 + 400);
+}
+
+function checkZero() {
+  const remaining = items.filter(i => !i.archived).length;
+  if (remaining === 0) {
+    setTimeout(triggerInboxZero, 200);
+  }
+}
+
+// ─────────────────────────────────────────────
+// COUNTER & PROGRESS
+// ─────────────────────────────────────────────
+function updateCounter() {
+  const remaining = items.filter(i => !i.archived).length;
+  const pct = (archivedCount / TOTAL) * 100;
+
+  const countEl = document.getElementById('count-display');
+  countEl.textContent = remaining;
+  countEl.classList.remove('pop');
+  void countEl.offsetWidth;
+  countEl.classList.add('pop');
+
+  const fill = document.getElementById('progress-fill');
+  fill.style.width = pct + '%';
+
+  // Color shift
+  const g = Math.round((pct / 100) * 200);
+  fill.style.background = `rgb(${255 - g}, 255, ${255 - g/2})`;
+
+  const label = document.getElementById('progress-label');
+  if (pct >= 90) {
+    label.textContent = 'Almost... keep going.';
+  } else if (pct >= 50) {
+    label.textContent = 'Halfway there. You\'ve got this.';
+  } else if (pct > 0) {
+    label.textContent = `${Math.round(pct)}% cleared`;
+  } else {
+    label.textContent = '';
+  }
+}
+
+// ─────────────────────────────────────────────
+// INBOX ZERO MOMENT
+// ─────────────────────────────────────────────
+function triggerInboxZero() {
+  zeroCount++;
+  localStorage.setItem('inboxZeroCount', zeroCount);
+  updateSessionStat();
+
+  playZeroThud();
+
+  const overlay = document.getElementById('zero-overlay');
+  const circle = document.getElementById('zero-circle');
+
+  overlay.style.opacity = '1';
+  overlay.classList.add('show');
+
+  // Expand circle
+  const size = Math.max(window.innerWidth, window.innerHeight) * 3;
+  circle.style.transition = 'width 0.8s cubic-bezier(0.4,0,0.2,1), height 0.8s cubic-bezier(0.4,0,0.2,1)';
+  circle.style.width = size + 'px';
+  circle.style.height = size + 'px';
+
+  // Update content
+  document.getElementById('zero-cleared').textContent =
+    `You cleared ${TOTAL} fake ${mode === 'gmail' ? 'emails' : 'tickets'}.`;
+  document.getElementById('zero-twist').innerHTML = mode === 'gmail'
+    ? `Your real inbox still has <strong>1,203 unread.</strong> 🙂`
+    : `Your real Jira has <strong>847 open tickets.</strong> Touch grass.`;
+  document.getElementById('zero-subtitle').textContent =
+    mode === 'gmail' ? 'You actually did it.' : 'All clear. Theoretically.';
+
+  const zsc = document.getElementById('zero-session-count');
+  zsc.textContent = `Inbox zero achieved ${zeroCount} time${zeroCount === 1 ? '' : 's'} today`;
+
+  // Confetti
+  setTimeout(launchConfetti, 600);
+}
+
+function launchConfetti() {
+  const colors = ['#00C851','#ffffff','#69F0AE','#B9F6CA','#CCFF90','#F1F8E9'];
+  for (let i = 0; i < 80; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + 'vw';
+    piece.style.top = '-10px';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.width = (6 + Math.random() * 8) + 'px';
+    piece.style.height = (8 + Math.random() * 10) + 'px';
+    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    piece.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+    piece.style.animationDelay = (Math.random() * 0.8) + 's';
+    document.body.appendChild(piece);
+    piece.addEventListener('animationend', () => piece.remove());
+  }
+}
+
+function restartFromZero() {
+  const overlay = document.getElementById('zero-overlay');
+  const circle = document.getElementById('zero-circle');
+  overlay.style.opacity = '0';
+  overlay.classList.remove('show');
+  setTimeout(() => {
+    circle.style.transition = 'none';
+    circle.style.width = '0';
+    circle.style.height = '0';
+  }, 300);
+  setTimeout(initInbox, 350);
+}
+
+// ─────────────────────────────────────────────
+// MODE & INIT
+// ─────────────────────────────────────────────
+function setMode(m) {
+  mode = m;
+  document.body.classList.toggle('jira-mode', m === 'jira');
+  document.getElementById('btn-gmail').classList.toggle('active', m === 'gmail');
+  document.getElementById('btn-jira').classList.toggle('active', m === 'jira');
+  document.getElementById('logo-icon').textContent = m === 'gmail' ? 'M' : 'J';
+  document.getElementById('logo-text').textContent = m === 'gmail' ? 'Gmail' : 'Jira';
+  document.getElementById('count-label').textContent = m === 'gmail' ? 'unread' : 'open tickets';
+  initInbox();
+}
+
+function initInbox() {
+  const sourceData = mode === 'gmail' ? GMAIL_ITEMS : JIRA_ITEMS;
+  items = sourceData.map(d => ({ ...d, archived: false, read: false }));
+  archivedCount = 0;
+  selectedItem = null;
+  renderInbox();
+  updateCounter();
+}
+
+function restartInbox() {
+  getAudio(); // unlock audio context on user gesture
+  playPop(300, 'sine', 0.12);
+  initInbox();
+}
+
+function updateSessionStat() {
+  const el = document.getElementById('session-stat');
+  el.innerHTML = `Inbox zero achieved <strong>${zeroCount}</strong> time${zeroCount === 1 ? '' : 's'} today`;
+}
+
+// ─────────────────────────────────────────────
+// KEYBOARD
+// ─────────────────────────────────────────────
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'e' || e.key === 'E') {
+    if (selectedItem !== null) {
+      archiveSingle(selectedItem);
+    } else {
+      // Archive topmost
+      const first = items.findIndex(i => !i.archived);
+      if (first !== -1) archiveSingle(first);
+    }
+  }
+});
+
+// ─────────────────────────────────────────────
+// BOOT
+// ─────────────────────────────────────────────
+updateSessionStat();
+initInbox();
+</script>
+</body>
+</html>

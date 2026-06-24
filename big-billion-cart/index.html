@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Big Billion Cart — Everything's on Sale</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue: #2874f0;
+      --blue-dark: #1a5dc9;
+      --blue-light: #e8f0fe;
+      --yellow: #f0c040;
+      --yellow-dark: #d4a800;
+      --red: #e11d2c;
+      --green: #26a541;
+      --gray: #878787;
+      --gray-light: #f1f3f6;
+      --white: #ffffff;
+      --shadow: 0 2px 8px rgba(0,0,0,0.12);
+      --shadow-lg: 0 4px 20px rgba(0,0,0,0.18);
+      --radius: 8px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--gray-light);
+      color: #212121;
+      min-height: 100vh;
+    }
+
+    /* ───── HEADER ───── */
+    header {
+      background: var(--blue);
+      color: white;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    }
+    .header-inner {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 16px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .logo-group { display: flex; flex-direction: column; line-height: 1.1; }
+    .logo-title { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.5px; }
+    .logo-tag { font-size: 0.68rem; color: rgba(255,255,255,0.75); font-style: italic; }
+    .cart-btn {
+      background: var(--yellow);
+      color: #212121;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 18px;
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.15s, transform 0.1s;
+      position: relative;
+    }
+    .cart-btn:hover { background: var(--yellow-dark); }
+    .cart-btn:active { transform: scale(0.96); }
+    .cart-icon { font-size: 1.2rem; }
+    .cart-badge {
+      background: var(--red);
+      color: white;
+      border-radius: 50%;
+      width: 20px; height: 20px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 800;
+      transition: transform 0.2s;
+    }
+    .cart-badge.bump { animation: bump 0.3s ease; }
+    @keyframes bump { 0%,100%{transform:scale(1)} 50%{transform:scale(1.5)} }
+
+    /* ───── FLASH BANNER ───── */
+    .flash-banner {
+      background: #1a0000;
+      color: white;
+      overflow: hidden;
+      height: 38px;
+      position: relative;
+      border-bottom: 2px solid var(--red);
+    }
+    .flash-inner {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 16px;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+    .flash-label {
+      background: var(--red);
+      color: white;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 4px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-right: 12px;
+      letter-spacing: 0.5px;
+    }
+    .ticker-wrap { overflow: hidden; flex: 1; height: 38px; display: flex; align-items: center; }
+    .ticker-track {
+      display: flex;
+      gap: 64px;
+      animation: ticker 18s linear infinite;
+      white-space: nowrap;
+    }
+    .ticker-item { font-size: 0.8rem; color: rgba(255,255,255,0.85); flex-shrink: 0; }
+    @keyframes ticker { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+    .countdown-box {
+      display: flex; align-items: center; gap: 6px;
+      flex-shrink: 0; margin-left: 16px;
+      font-size: 0.8rem; font-weight: 700;
+    }
+    .cd-seg {
+      background: var(--red);
+      color: white;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-variant-numeric: tabular-nums;
+      min-width: 28px;
+      text-align: center;
+    }
+    .cd-colon { color: rgba(255,255,255,0.6); }
+
+    /* ───── MAIN LAYOUT ───── */
+    main {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 20px 16px 80px;
+    }
+
+    /* ───── SECTION TITLES ───── */
+    .section-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #212121;
+      margin-bottom: 14px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 2px;
+      background: linear-gradient(to right, var(--blue), transparent);
+      border-radius: 2px;
+    }
+
+    /* ───── PRODUCT GRID ───── */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(188px, 1fr));
+      gap: 14px;
+    }
+
+    .product-card {
+      background: white;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: box-shadow 0.2s, transform 0.15s;
+      position: relative;
+    }
+    .product-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+
+    .discount-badge {
+      position: absolute;
+      top: 10px; left: 10px;
+      background: var(--green);
+      color: white;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+      z-index: 2;
+    }
+
+    .product-emoji {
+      font-size: 3.5rem;
+      text-align: center;
+      padding: 28px 16px 12px;
+      background: var(--gray-light);
+      line-height: 1;
+    }
+
+    .product-body { padding: 12px; flex: 1; display: flex; flex-direction: column; gap: 4px; }
+
+    .product-name {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #212121;
+      line-height: 1.3;
+    }
+
+    .price-row { display: flex; align-items: baseline; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
+    .price-sale { font-size: 1.05rem; font-weight: 800; color: var(--blue); }
+    .price-mrp { font-size: 0.75rem; color: var(--gray); text-decoration: line-through; }
+
+    .urgency {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--red);
+      animation: pulse-red 1.8s ease-in-out infinite;
+      margin-top: 2px;
+    }
+    @keyframes pulse-red {
+      0%,100% { opacity: 1; }
+      50% { opacity: 0.45; }
+    }
+
+    .add-to-cart-btn {
+      margin: 10px 12px 12px;
+      background: var(--blue);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 9px 0;
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.3px;
+      transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+      position: relative;
+      overflow: hidden;
+    }
+    .add-to-cart-btn:hover { background: var(--blue-dark); box-shadow: 0 2px 8px rgba(40,116,240,0.4); }
+    .add-to-cart-btn:active { transform: scale(0.96); }
+    .add-to-cart-btn.added { background: var(--green); }
+    .add-to-cart-btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: white;
+      opacity: 0;
+      border-radius: inherit;
+      transition: opacity 0.3s;
+    }
+    .add-to-cart-btn.pop::after { animation: pop-flash 0.3s ease; }
+    @keyframes pop-flash { 0%{opacity:0} 30%{opacity:0.3} 100%{opacity:0} }
+
+    /* ───── FLYING ITEM ANIMATION ───── */
+    .fly-item {
+      position: fixed;
+      z-index: 9999;
+      font-size: 1.8rem;
+      pointer-events: none;
+      transition: none;
+      will-change: transform, opacity;
+    }
+
+    /* ───── CART PANEL ───── */
+    .panel {
+      display: none;
+      background: white;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+    }
+    .panel.active { display: block; }
+
+    .panel-header {
+      background: var(--blue);
+      color: white;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .panel-header h2 { font-size: 1.1rem; font-weight: 700; }
+    .back-btn {
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 5px 14px;
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .back-btn:hover { background: rgba(255,255,255,0.35); }
+
+    .panel-body { padding: 20px; }
+
+    .cart-empty {
+      text-align: center;
+      padding: 48px 20px;
+      color: var(--gray);
+    }
+    .cart-empty-icon { font-size: 3rem; margin-bottom: 12px; }
+    .cart-empty p { font-size: 0.9rem; }
+
+    .cart-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--gray-light);
+    }
+    .cart-item:last-child { border-bottom: none; }
+    .cart-item-emoji { font-size: 2rem; flex-shrink: 0; }
+    .cart-item-info { flex: 1; }
+    .cart-item-name { font-size: 0.85rem; font-weight: 600; }
+    .cart-item-price { font-size: 0.8rem; color: var(--blue); font-weight: 700; margin-top: 2px; }
+    .cart-item-mrp { font-size: 0.75rem; color: var(--gray); text-decoration: line-through; }
+    .remove-btn {
+      background: none;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      color: var(--gray);
+      font-size: 0.75rem;
+      padding: 3px 8px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .remove-btn:hover { border-color: var(--red); color: var(--red); }
+
+    .cart-summary {
+      background: var(--blue-light);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-top: 16px;
+    }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      margin-bottom: 8px;
+      color: #444;
+    }
+    .summary-row.total { font-weight: 700; font-size: 0.95rem; color: #212121; padding-top: 8px; border-top: 1px solid #c5d8fb; }
+    .summary-row.saving { color: var(--green); font-weight: 700; font-size: 0.9rem; }
+    .summary-row .striked { text-decoration: line-through; color: var(--gray); font-weight: 400; }
+
+    .emi-note {
+      margin-top: 14px;
+      background: #fffbe6;
+      border: 1px solid var(--yellow);
+      border-radius: 6px;
+      padding: 10px 14px;
+      font-size: 0.8rem;
+      color: #7a5c00;
+      font-weight: 500;
+    }
+
+    .proceed-btn {
+      display: block;
+      width: 100%;
+      margin-top: 18px;
+      background: var(--yellow);
+      color: #212121;
+      border: none;
+      border-radius: 6px;
+      padding: 14px;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      letter-spacing: 0.3px;
+      transition: background 0.15s, transform 0.12s, box-shadow 0.15s;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+    .proceed-btn:hover { background: var(--yellow-dark); color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+    .proceed-btn:active { transform: scale(0.97); }
+
+    /* ───── CHECKOUT ───── */
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 0.78rem; font-weight: 600; color: #444; margin-bottom: 5px; }
+    .form-input {
+      width: 100%;
+      border: 1.5px solid #ddd;
+      border-radius: 6px;
+      padding: 10px 12px;
+      font-family: inherit;
+      font-size: 0.88rem;
+      color: #212121;
+      transition: border-color 0.15s;
+      background: white;
+    }
+    .form-input:focus { outline: none; border-color: var(--blue); }
+
+    .payment-options { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+    .pay-opt {
+      flex: 1;
+      min-width: 80px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      padding: 10px 8px;
+      text-align: center;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: white;
+      transition: border-color 0.15s, background 0.15s, color 0.15s;
+    }
+    .pay-opt:hover { border-color: var(--blue); color: var(--blue); }
+    .pay-opt.selected { border-color: var(--blue); background: var(--blue); color: white; }
+    .pay-opt .pay-icon { font-size: 1.4rem; display: block; margin-bottom: 4px; }
+
+    .place-order-btn {
+      display: block;
+      width: 100%;
+      margin-top: 24px;
+      background: var(--blue);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 16px;
+      font-family: inherit;
+      font-size: 1.1rem;
+      font-weight: 800;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      transition: background 0.15s, transform 0.12s, box-shadow 0.15s;
+      box-shadow: 0 4px 12px rgba(40,116,240,0.4);
+    }
+    .place-order-btn:hover { background: var(--blue-dark); box-shadow: 0 6px 18px rgba(40,116,240,0.5); }
+    .place-order-btn:active { transform: scale(0.97); }
+    .place-order-btn.press { animation: press-anim 0.2s ease; }
+    @keyframes press-anim { 0%{transform:scale(1)} 40%{transform:scale(0.95)} 100%{transform:scale(1)} }
+
+    .order-note {
+      text-align: center;
+      font-size: 0.72rem;
+      color: var(--gray);
+      margin-top: 10px;
+    }
+
+    /* ───── RECEIPT ───── */
+    .receipt-card {
+      border: 2px dashed var(--blue);
+      border-radius: 12px;
+      padding: 28px 24px;
+      text-align: center;
+      background: white;
+      position: relative;
+      overflow: hidden;
+    }
+    .receipt-card::before {
+      content: '🏆';
+      position: absolute;
+      top: -20px; right: -20px;
+      font-size: 5rem;
+      opacity: 0.06;
+    }
+    .receipt-logo { font-size: 2rem; margin-bottom: 4px; }
+    .receipt-order { font-size: 0.75rem; color: var(--gray); font-weight: 500; margin-bottom: 16px; letter-spacing: 0.5px; }
+    .receipt-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--gray-light);
+      font-size: 0.88rem;
+    }
+    .receipt-row:last-of-type { border-bottom: none; }
+    .receipt-row .label { color: #555; }
+    .receipt-row .value { font-weight: 700; }
+    .receipt-row .value.blue { color: var(--blue); }
+    .receipt-row .value.striked { text-decoration: line-through; color: var(--gray); font-weight: 400; }
+    .receipt-row .value.green { color: var(--green); font-size: 1rem; }
+    .receipt-row .value.zero { color: var(--green); font-size: 1.4rem; font-weight: 900; }
+
+    .certified-banner {
+      margin: 20px 0 16px;
+      background: linear-gradient(135deg, var(--blue), #5ba3ff);
+      color: white;
+      border-radius: 10px;
+      padding: 14px;
+      font-size: 1rem;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+    }
+
+    .receipt-actions { display: flex; gap: 12px; margin-top: 6px; }
+    .share-btn {
+      flex: 1;
+      background: var(--blue);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 11px;
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .share-btn:hover { background: var(--blue-dark); }
+    .browse-btn {
+      flex: 1;
+      background: var(--yellow);
+      color: #212121;
+      border: none;
+      border-radius: 6px;
+      padding: 11px;
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .browse-btn:hover { background: var(--yellow-dark); color: white; }
+
+    .copy-toast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #212121;
+      color: white;
+      padding: 10px 22px;
+      border-radius: 30px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      z-index: 9999;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .copy-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+    /* ───── CONFETTI ───── */
+    .confetti-canvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9998;
+    }
+
+    /* ───── VIEWS ───── */
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* ───── RESPONSIVE ───── */
+    @media (max-width: 540px) {
+      .product-grid { grid-template-columns: repeat(2, 1fr); }
+      .header-inner { height: 56px; }
+      .logo-title { font-size: 1.1rem; }
+    }
+    @media (max-width: 360px) {
+      .product-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ───── HEADER ───── -->
+<header>
+  <div class="header-inner">
+    <div class="logo-group">
+      <span class="logo-title">🛍️ Big Billion Haul</span>
+      <span class="logo-tag">Everything's on sale. Nothing's being bought.</span>
+    </div>
+    <button class="cart-btn" id="cartBtn" onclick="goToCart()">
+      <span class="cart-icon">🛒</span>
+      Cart
+      <span class="cart-badge" id="cartBadge">0</span>
+    </button>
+  </div>
+</header>
+
+<!-- ───── FLASH BANNER ───── -->
+<div class="flash-banner">
+  <div class="flash-inner">
+    <span class="flash-label">⚡ FLASH SALE</span>
+    <div class="ticker-wrap">
+      <div class="ticker-track" id="tickerTrack"></div>
+    </div>
+    <div class="countdown-box">
+      <span class="cd-seg" id="cdH">00</span>
+      <span class="cd-colon">:</span>
+      <span class="cd-seg" id="cdM">05</span>
+      <span class="cd-colon">:</span>
+      <span class="cd-seg" id="cdS">00</span>
+    </div>
+  </div>
+</div>
+
+<!-- ───── MAIN ───── -->
+<main>
+
+  <!-- PRODUCTS VIEW -->
+  <div class="view active" id="viewProducts">
+    <div class="section-title">Today's Deals — 12 Must-Haves</div>
+    <div class="product-grid" id="productGrid"></div>
+  </div>
+
+  <!-- CART VIEW -->
+  <div class="view" id="viewCart">
+    <div class="panel active">
+      <div class="panel-header">
+        <h2>🛒 Your Cart</h2>
+        <button class="back-btn" onclick="goTo('viewProducts')">← Keep Shopping</button>
+      </div>
+      <div class="panel-body" id="cartBody"></div>
+    </div>
+  </div>
+
+  <!-- CHECKOUT VIEW -->
+  <div class="view" id="viewCheckout">
+    <div class="panel active">
+      <div class="panel-header">
+        <h2>📦 Checkout</h2>
+        <button class="back-btn" onclick="goTo('viewCart')">← Back to Cart</button>
+      </div>
+      <div class="panel-body">
+        <div class="form-group">
+          <label class="form-label">Delivery Address</label>
+          <input class="form-input" type="text" value="123, Dream Street, Wishful Nagar" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">City / State / PIN</label>
+          <input class="form-input" type="text" value="Bengaluru, Karnataka — 560001" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone</label>
+          <input class="form-input" type="tel" value="+91 98765 43210" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Payment Method</label>
+          <div class="payment-options" id="payOpts">
+            <button class="pay-opt selected" data-pay="upi" onclick="selectPay(this)">
+              <span class="pay-icon">💸</span>UPI
+            </button>
+            <button class="pay-opt" data-pay="card" onclick="selectPay(this)">
+              <span class="pay-icon">💳</span>Card
+            </button>
+            <button class="pay-opt" data-pay="cod" onclick="selectPay(this)">
+              <span class="pay-icon">📦</span>COD
+            </button>
+            <button class="pay-opt" data-pay="wallet" onclick="selectPay(this)">
+              <span class="pay-icon">👛</span>Wallet
+            </button>
+          </div>
+        </div>
+
+        <div class="cart-summary" style="margin-top:0;">
+          <div class="summary-row">
+            <span>Items in order</span>
+            <span id="co-count">0 items</span>
+          </div>
+          <div class="summary-row">
+            <span>MRP Total</span>
+            <span class="striked" id="co-mrp">₹0</span>
+          </div>
+          <div class="summary-row saving">
+            <span>Big Billion Discount</span>
+            <span id="co-saving">−₹0</span>
+          </div>
+          <div class="summary-row total">
+            <span>You Pay</span>
+            <span style="color:var(--green);font-size:1.1rem;">₹0.00 🎉</span>
+          </div>
+        </div>
+
+        <button class="place-order-btn" id="placeOrderBtn" onclick="placeOrder()">
+          Place Order — ₹0
+        </button>
+        <p class="order-note">100% Free. 0% Real. 100% Satisfying.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- RECEIPT VIEW -->
+  <div class="view" id="viewReceipt">
+    <div class="panel active">
+      <div class="panel-header">
+        <h2>🎉 Order Confirmed!</h2>
+      </div>
+      <div class="panel-body">
+        <div class="receipt-card">
+          <div class="receipt-logo">🛍️</div>
+          <div class="receipt-order" id="rcptOrder">Order #BB2025DREAM</div>
+          <div class="receipt-row">
+            <span class="label">Items Ordered</span>
+            <span class="value blue" id="rcptItems">0 items</span>
+          </div>
+          <div class="receipt-row">
+            <span class="label">MRP Total</span>
+            <span class="value striked" id="rcptMrp">₹0</span>
+          </div>
+          <div class="receipt-row">
+            <span class="label">Big Billion Discount</span>
+            <span class="value green" id="rcptSaving">₹0</span>
+          </div>
+          <div class="receipt-row" style="padding:14px 0 8px;">
+            <span class="label" style="font-size:1rem;font-weight:700;">You Paid</span>
+            <span class="value zero">₹0.00</span>
+          </div>
+          <div class="certified-banner">
+            Certified Saver 🏆 — You are an absolute legend.
+          </div>
+          <div class="receipt-actions">
+            <button class="share-btn" onclick="shareHaul()">📤 Share Haul</button>
+            <button class="browse-btn" onclick="resetAll()">🔄 Browse More</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- TOAST -->
+<div class="copy-toast" id="copyToast">📋 Copied to clipboard!</div>
+<!-- CONFETTI CANVAS -->
+<canvas class="confetti-canvas" id="confettiCanvas"></canvas>
+
+<script>
+// ───── PRODUCTS DATA ─────
+const PRODUCTS = [
+  { id:1,  name:'iPhone 16',         emoji:'📱', mrp:79999,  sale:59999, urgency:'Only 2 left!' },
+  { id:2,  name:'Samsung 65" TV',    emoji:'📺', mrp:120000, sale:68999, urgency:'47 people viewing' },
+  { id:3,  name:'boAt Earbuds',      emoji:'🎧', mrp:4999,   sale:999,   urgency:'Only 2 left!' },
+  { id:4,  name:'Instant Pot',       emoji:'🍳', mrp:12000,  sale:4499,  urgency:'36 people viewing' },
+  { id:5,  name:'Nike Shoes',        emoji:'👟', mrp:8999,   sale:3499,  urgency:'Only 2 left!' },
+  { id:6,  name:'Kindle',            emoji:'📖', mrp:14999,  sale:9999,  urgency:'Only 2 left!' },
+  { id:7,  name:'Air Purifier',      emoji:'💨', mrp:18999,  sale:9499,  urgency:'12 people viewing' },
+  { id:8,  name:'Gaming Chair',      emoji:'🎮', mrp:22000,  sale:12999, urgency:'Only 2 left!' },
+  { id:9,  name:'Instant Camera',    emoji:'📷', mrp:9499,   sale:5999,  urgency:'Only 2 left!' },
+  { id:10, name:'Coffee Maker',      emoji:'☕', mrp:6999,   sale:2999,  urgency:'28 people viewing' },
+  { id:11, name:'Dyson Vacuum',      emoji:'🌀', mrp:45000,  sale:28999, urgency:'Only 2 left!' },
+  { id:12, name:'MacBook Air',       emoji:'💻', mrp:114900, sale:89990, urgency:'Only 2 left!' },
+];
+
+// ───── STATE ─────
+let cart = [];
+let selectedPay = 'upi';
+
+// ───── HELPERS ─────
+const fmt = n => '₹' + n.toLocaleString('en-IN');
+const disc = (mrp, sale) => Math.round((mrp - sale) / mrp * 100);
+const pad2 = n => String(n).padStart(2, '0');
+
+function goTo(viewId) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(viewId).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function goToCart() {
+  renderCart();
+  goTo('viewCart');
+}
+
+// ───── TICKER ─────
+(function buildTicker() {
+  const deals = [
+    '⚡ Flash Sale ends in:', '📱 iPhone 16 — 25% OFF', '📺 Samsung TV — 43% OFF',
+    '🎧 boAt Earbuds — 80% OFF', '💻 MacBook Air — 22% OFF', '🌀 Dyson — 36% OFF',
+    '☕ Coffee Maker — 57% OFF', '👟 Nike Shoes — 61% OFF', '📖 Kindle — 33% OFF',
+    '⚡ Hurry! Prices reset soon!', '🎮 Gaming Chair — 41% OFF', '📷 Camera — 37% OFF',
+  ];
+  const doubled = [...deals, ...deals];
+  const track = document.getElementById('tickerTrack');
+  doubled.forEach(d => {
+    const span = document.createElement('span');
+    span.className = 'ticker-item';
+    span.textContent = d;
+    track.appendChild(span);
+  });
+})();
+
+// ───── COUNTDOWN ─────
+(function startCountdown() {
+  let total = 5 * 60; // 5 minutes
+  const h = document.getElementById('cdH');
+  const m = document.getElementById('cdM');
+  const s = document.getElementById('cdS');
+  function tick() {
+    if (total <= 0) { total = 5 * 60; } // loop
+    const mm = Math.floor(total / 60);
+    const ss = total % 60;
+    h.textContent = '00';
+    m.textContent = pad2(mm);
+    s.textContent = pad2(ss);
+    total--;
+  }
+  tick();
+  setInterval(tick, 1000);
+})();
+
+// ───── RENDER PRODUCTS ─────
+function renderProducts() {
+  const grid = document.getElementById('productGrid');
+  grid.innerHTML = '';
+  PRODUCTS.forEach(p => {
+    const pct = disc(p.mrp, p.sale);
+    const inCart = cart.some(c => c.id === p.id);
+    const card = document.createElement('div');
+    card.className = 'product-card';
+    card.id = 'card-' + p.id;
+    card.innerHTML = `
+      <span class="discount-badge">${pct}% OFF</span>
+      <div class="product-emoji" id="emoji-${p.id}">${p.emoji}</div>
+      <div class="product-body">
+        <div class="product-name">${p.name}</div>
+        <div class="price-row">
+          <span class="price-sale">${fmt(p.sale)}</span>
+          <span class="price-mrp">${fmt(p.mrp)}</span>
+        </div>
+        <div class="urgency">🔴 ${p.urgency}</div>
+      </div>
+      <button class="add-to-cart-btn${inCart ? ' added' : ''}" id="btn-${p.id}" onclick="addToCart(${p.id}, this)">
+        ${inCart ? '✓ Added' : '+ Add to Cart'}
+      </button>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+// ───── ADD TO CART ─────
+function addToCart(id, btn) {
+  const p = PRODUCTS.find(x => x.id === id);
+  if (!cart.some(c => c.id === id)) {
+    cart.push({ ...p });
+  }
+
+  // Button state
+  btn.classList.add('added', 'pop');
+  btn.textContent = '✓ Added';
+  setTimeout(() => btn.classList.remove('pop'), 350);
+
+  // Update badge
+  updateBadge();
+
+  // Flying animation
+  flyToCart(id, p.emoji);
+}
+
+function updateBadge() {
+  const badge = document.getElementById('cartBadge');
+  badge.textContent = cart.length;
+  badge.classList.add('bump');
+  setTimeout(() => badge.classList.remove('bump'), 350);
+}
+
+function flyToCart(id, emoji) {
+  const emojiEl = document.getElementById('emoji-' + id);
+  const cartEl = document.querySelector('.cart-btn');
+  if (!emojiEl || !cartEl) return;
+
+  const srcRect = emojiEl.getBoundingClientRect();
+  const dstRect = cartEl.getBoundingClientRect();
+
+  const fly = document.createElement('div');
+  fly.className = 'fly-item';
+  fly.textContent = emoji;
+  fly.style.cssText = `
+    left: ${srcRect.left + srcRect.width / 2 - 16}px;
+    top: ${srcRect.top + srcRect.height / 2 - 16}px;
+    transition: none;
+  `;
+  document.body.appendChild(fly);
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      const dx = (dstRect.left + dstRect.width / 2) - (srcRect.left + srcRect.width / 2);
+      const dy = (dstRect.top + dstRect.height / 2) - (srcRect.top + srcRect.height / 2);
+      fly.style.transition = 'transform 0.55s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.55s ease';
+      fly.style.transform = `translate(${dx}px, ${dy}px) scale(0.3)`;
+      fly.style.opacity = '0';
+      setTimeout(() => fly.remove(), 600);
+    });
+  });
+}
+
+// ───── RENDER CART ─────
+function renderCart() {
+  const body = document.getElementById('cartBody');
+  if (cart.length === 0) {
+    body.innerHTML = `
+      <div class="cart-empty">
+        <div class="cart-empty-icon">🛒</div>
+        <p>Your cart is empty.<br>Go grab some deals — they're all free anyway!</p>
+        <button class="proceed-btn" style="margin-top:20px;" onclick="goTo('viewProducts')">Browse Deals</button>
+      </div>`;
+    return;
+  }
+
+  let totalMrp = 0, totalSale = 0;
+  let itemsHtml = cart.map(p => {
+    totalMrp += p.mrp;
+    totalSale += p.sale;
+    return `
+      <div class="cart-item">
+        <span class="cart-item-emoji">${p.emoji}</span>
+        <div class="cart-item-info">
+          <div class="cart-item-name">${p.name}</div>
+          <div class="cart-item-price">${fmt(p.sale)}</div>
+          <div class="cart-item-mrp">${fmt(p.mrp)}</div>
+        </div>
+        <button class="remove-btn" onclick="removeFromCart(${p.id})">Remove</button>
+      </div>`;
+  }).join('');
+
+  const saving = totalMrp - totalSale;
+  body.innerHTML = `
+    ${itemsHtml}
+    <div class="cart-summary">
+      <div class="summary-row">
+        <span>Price (${cart.length} items)</span>
+        <span class="striked">${fmt(totalMrp)}</span>
+      </div>
+      <div class="summary-row saving">
+        <span>🎉 You're saving</span>
+        <span>${fmt(saving)}</span>
+      </div>
+      <div class="summary-row total">
+        <span>Total</span>
+        <span style="color:var(--green)">₹0.00</span>
+      </div>
+    </div>
+    <div class="emi-note">
+      💳 EMI available: <strong>₹0/month for 0 months 😄</strong><br>
+      <small>No interest. No payment. No stress. Pure bliss.</small>
+    </div>
+    <button class="proceed-btn" onclick="goToCheckout()">Proceed to Checkout →</button>
+  `;
+}
+
+function removeFromCart(id) {
+  cart = cart.filter(c => c.id !== id);
+  updateBadge();
+  renderCart();
+  // Re-render product buttons
+  const btn = document.getElementById('btn-' + id);
+  if (btn) { btn.classList.remove('added'); btn.textContent = '+ Add to Cart'; }
+}
+
+// ───── CHECKOUT ─────
+function goToCheckout() {
+  if (cart.length === 0) return;
+  let totalMrp = cart.reduce((s, p) => s + p.mrp, 0);
+  let saving = cart.reduce((s, p) => s + (p.mrp - p.sale), 0);
+  document.getElementById('co-count').textContent = cart.length + ' items';
+  document.getElementById('co-mrp').textContent = fmt(totalMrp);
+  document.getElementById('co-saving').textContent = '−' + fmt(saving);
+  goTo('viewCheckout');
+}
+
+function selectPay(btn) {
+  document.querySelectorAll('.pay-opt').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedPay = btn.dataset.pay;
+}
+
+function placeOrder() {
+  const btn = document.getElementById('placeOrderBtn');
+  btn.classList.add('press');
+  setTimeout(() => btn.classList.remove('press'), 250);
+
+  setTimeout(() => {
+    showReceipt();
+    triggerConfetti();
+  }, 400);
+}
+
+// ───── RECEIPT ─────
+function showReceipt() {
+  const totalMrp = cart.reduce((s, p) => s + p.mrp, 0);
+  const saving = cart.reduce((s, p) => s + (p.mrp - p.sale), 0);
+  const orderId = 'BB' + Date.now().toString().slice(-6) + 'DREAM';
+
+  document.getElementById('rcptOrder').textContent = 'Order #' + orderId;
+  document.getElementById('rcptItems').textContent = cart.length + ' item' + (cart.length !== 1 ? 's' : '');
+  document.getElementById('rcptMrp').textContent = fmt(totalMrp);
+  document.getElementById('rcptSaving').textContent = '−' + fmt(saving) + ' saved!';
+
+  goTo('viewReceipt');
+}
+
+function shareHaul() {
+  const totalMrp = cart.reduce((s, p) => s + p.mrp, 0);
+  const names = cart.map(p => p.emoji + ' ' + p.name).join(', ');
+  const text = `I just bought ${cart.length} items worth ${fmt(totalMrp)} on Big Billion Cart and paid ₹0! 😎🏆\n\nHaul: ${names}\n\n#BigBillionCart #CertifiedSaver`;
+  navigator.clipboard.writeText(text).then(() => showToast('📋 Haul copied to clipboard!'));
+}
+
+function showToast(msg) {
+  const t = document.getElementById('copyToast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+function resetAll() {
+  cart = [];
+  updateBadge();
+  renderProducts();
+  goTo('viewProducts');
+}
+
+// ───── CONFETTI ─────
+function triggerConfetti() {
+  const canvas = document.getElementById('confettiCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const colors = ['#2874f0','#f0c040','#e11d2c','#26a541','#ff7043','#ab47bc','#26c6da'];
+  const pieces = Array.from({ length: 160 }, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * -canvas.height * 0.5 - 20,
+    r: Math.random() * 7 + 4,
+    color: colors[Math.floor(Math.random() * colors.length)],
+    speed: Math.random() * 3 + 2,
+    angle: Math.random() * Math.PI * 2,
+    spin: (Math.random() - 0.5) * 0.2,
+    drift: (Math.random() - 0.5) * 2,
+    shape: Math.random() > 0.5 ? 'rect' : 'circle',
+    w: Math.random() * 10 + 6,
+    h: Math.random() * 5 + 3,
+  }));
+
+  let frame = 0;
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    pieces.forEach(p => {
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.angle);
+      ctx.fillStyle = p.color;
+      if (p.shape === 'circle') {
+        ctx.beginPath();
+        ctx.arc(0, 0, p.r, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      }
+      ctx.restore();
+
+      p.y += p.speed;
+      p.x += p.drift;
+      p.angle += p.spin;
+    });
+    frame++;
+    if (frame < 200) requestAnimationFrame(draw);
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  draw();
+}
+
+// ───── INIT ─────
+renderProducts();
+</script>
+</body>
+</html>
